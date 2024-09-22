@@ -5,7 +5,7 @@ Este proyecto, tiene por finalidad que el estudiante ponga en práctica los cono
 del curso, las investigaciones realizadas y demás fuente relacionada; y conforme a lo anterior analice, desarrolle y
 entregue lo que a continuación se le pide:
 
-DESCRIPCIÓN DEL PROYECTO
+DESCRIPCIÓN DEL PROYECTO:
 La empresa “TRANSQL” tiene planificado crear el Sistema de Reservación de Vehículos Propios (los vehículos de la propia
 organización). Después de aplicar todos los métodos para analizar la situación dada, ha concluido con la definición de la
 siguiente oportunidad de mejora:
