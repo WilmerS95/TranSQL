@@ -7,6 +7,8 @@
 *.rsuser
 *.suo
 *.user
+
+
 *.userosscache
 *.sln.docstates
 
@@ -49,6 +51,9 @@ Generated\ Files/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+#Idea
+.idea
 
 # Build Results of an ATL Project
 [Dd]ebugPS/
