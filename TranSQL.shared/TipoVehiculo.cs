@@ -15,12 +15,6 @@ namespace TranSQL.shared
         [StringLength(100)]
         private string NombreTipoVehiculo { get; set;} = string.Empty;
 
-        //public TipoVehiculo(int idTipoVehiculo, string nombreTipoVehiculo)
-        //{
-        //    IdTipoVehiculo = idTipoVehiculo;
-        //    NombreTipoVehiculo = nombreTipoVehiculo ?? throw new ArgumentNullException(nameof(nombreTipoVehiculo));
-        //}
-
         public TipoVehiculo(string nombreTipoVehiculo)
         {
             NombreTipoVehiculo = nombreTipoVehiculo ?? throw new ArgumentNullException(nameof(nombreTipoVehiculo));
