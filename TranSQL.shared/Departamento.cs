@@ -31,10 +31,10 @@ namespace TranSQL.shared
         }
 
         //Constructor que recibe idDepartamento y nombreDepartamento
-        public Departamento(int idDepartamento, string nombreDepartamento)
-        {
-            IdDepartamento = idDepartamento;
-            NombreDepartamento = nombreDepartamento;
-        }
+        //public Departamento(int idDepartamento, string nombreDepartamento)
+        //{
+        //    IdDepartamento = idDepartamento;
+        //    NombreDepartamento = nombreDepartamento;
+        //}
     }
 }
