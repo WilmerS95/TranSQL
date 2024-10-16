@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,12 +12,17 @@ namespace TranSQL.shared
     {
         private int IdReservacion {  get; set; }
 
+        [Required]
         private DateTime FechaReservacion { get; set; }
 
+        [Required]
         private DateTime FechaInicio {  get; set; }
 
+        [Required]
         private DateTime FechaFin {  get; set; }
 
+        [Required]
+        [StringLength(300)]
         private string Observaciones {  get; set; } = string.Empty;
         private int IdSolicitud { get; set; }
 
