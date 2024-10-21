@@ -9,14 +9,15 @@ namespace TranSQL.shared
 {
     public class InspeccionAccesorio
     {
-        private int IdInspeccion {  get; set; }
-        private int IdAccesorio { get; set; }
+        [Key]
+        public int IdInspeccion {  get; set; }
+        public int IdAccesorio { get; set; }
         [Required]
         [StringLength(75)]
-        private string EstadoAccesorio { get; set; } = string.Empty;
+        public string EstadoAccesorio { get; set; } = string.Empty;
 
-        private InspeccionVehiculo inspeccionVehiculo;
-        private Accesorio accesorio;
+        public InspeccionVehiculo inspeccionVehiculo;
+        public Accesorio accesorio;
 
         public InspeccionAccesorio(int idInspeccion, int idAccesorio, string estadoAccesorio, InspeccionVehiculo inspeccionVehiculo, Accesorio accesorio)
         {

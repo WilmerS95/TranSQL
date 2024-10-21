@@ -9,11 +9,12 @@ namespace TranSQL.shared
 {
     public class TipoVehiculo
     {
-        private int IdTipoVehiculo {  get; set; }
+        [Key]
+        public int IdTipoVehiculo {  get; set; }
 
         [Required]
         [StringLength(100)]
-        private string NombreTipoVehiculo { get; set;} = string.Empty;
+        public string NombreTipoVehiculo { get; set;} = string.Empty;
 
         public TipoVehiculo(string nombreTipoVehiculo)
         {

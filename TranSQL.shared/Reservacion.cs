@@ -10,26 +10,27 @@ namespace TranSQL.shared
 {
     public class Reservacion
     {
-        private int IdReservacion {  get; set; }
+        [Key]
+        public int IdReservacion {  get; set; }
 
         [Required]
-        private DateTime FechaReservacion { get; set; }
+        public DateTime FechaReservacion { get; set; }
 
         [Required]
-        private DateTime FechaInicio {  get; set; }
+        public DateTime FechaInicio {  get; set; }
 
         [Required]
-        private DateTime FechaFin {  get; set; }
+        public DateTime FechaFin {  get; set; }
 
         [Required]
         [StringLength(300)]
-        private string Observaciones {  get; set; } = string.Empty;
-        private int IdSolicitud { get; set; }
+        public string Observaciones {  get; set; } = string.Empty;
+        public int IdSolicitud { get; set; }
 
-        private string Placa { get; set; } = string.Empty;
+        public string Placa { get; set; } = string.Empty;
 
-        private SolicitudReservacion solicitudReservacion;
-        private Vehiculo vehiculo;
+        public SolicitudReservacion solicitudReservacion;
+        public Vehiculo vehiculo;
 
         public Reservacion(int idReservacion, DateTime fechaReservacion, DateTime fechaInicio, DateTime fechaFin, string observaciones, int idSolicitud, string placa, SolicitudReservacion solicitudReservacion, Vehiculo vehiculo)
         {

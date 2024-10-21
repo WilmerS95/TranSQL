@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,33 +10,35 @@ namespace TranSQL.shared
 {
     public class Colaborador
     {
-        private int IdColaborador { get; set; }
+        [Key]
+        public int IdColaborador { get; set; }
 
         [Required]
         [StringLength(50)]
-        private string PrimerNombre { get; set; } = string.Empty;
+        public string PrimerNombre { get; set; } = string.Empty;
 
         [StringLength(50)]
-        private string? SegundoNombre { get; set; }
+        public string? SegundoNombre { get; set; }
 
         [Required]
         [StringLength(50)]
-        private string PrimerApellido { get; set; } = string.Empty;
+        public string PrimerApellido { get; set; } = string.Empty;
 
         [StringLength(50)]
-        private string? SegundoApellido { get; set; }
+        public string? SegundoApellido { get; set; }
 
         [StringLength(50)]
-        private string? ApellidoDeCasada { get; set; }
+        public string? ApellidoDeCasada { get; set; }
 
         [Required]
         [StringLength(75)]
-        private string Correo { get; set; } = string.Empty;
+        public string Correo { get; set; } = string.Empty;
 
         [Required]
-        private int IdDepartamento { get; set; }
+        public int IdDepartamento { get; set; }
 
-        private Departamento departamento { get; set; }
+        [ForeignKey(nameof(IdDepartamento))]
+        public Departamento Departamento { get; set; }
 
         public Colaborador( string primerNombre, string? segundoNombre, string primerApellido, string? segundoApellido, string? apellidoDeCasada, string correo, int idDepartamento, Departamento departamento)
         {
@@ -47,7 +50,7 @@ namespace TranSQL.shared
             ApellidoDeCasada = apellidoDeCasada;
             Correo = correo ?? throw new ArgumentNullException(nameof(correo));
             IdDepartamento = idDepartamento;
-            this.departamento = departamento ?? throw new ArgumentNullException(nameof(departamento));
+            this.Departamento = departamento ?? throw new ArgumentNullException(nameof(departamento));
         }
 
         public Colaborador()

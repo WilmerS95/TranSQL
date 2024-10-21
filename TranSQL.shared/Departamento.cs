@@ -11,13 +11,14 @@ namespace TranSQL.shared
     {
 
         // Id único para el departamento
-        private int IdDepartamento { get; set; }
+        [Key]
+        public int IdDepartamento { get; set; }
 
         //Porque no acepta valores nulos se agrega required o se inicializa con string.Empty
         // Campo requerido que no acepta valores nulos
         [Required]
         [StringLength(100)]  // Si quieres limitar el tamaño como en la base de datos
-        private string NombreDepartamento { get; set; } = string.Empty;
+        public string NombreDepartamento { get; set; } = string.Empty;
 
         //Constructor vacío
         public Departamento()
