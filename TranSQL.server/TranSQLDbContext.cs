@@ -27,6 +27,17 @@ namespace TranSQL.server
         {
             modelBuilder.Entity<Colaborador>().ToTable("Colaborador");
             modelBuilder.Entity<Departamento>().ToTable("Departamento");
+            modelBuilder.Entity<Accesorio>().ToTable("Accesorio");
+            modelBuilder.Entity<Asignacion>().ToTable("Asignacion");
+            modelBuilder.Entity<EstadoSolicitud>().ToTable("EstadoSolicitud");
+            modelBuilder.Entity<EstadoVehiculo>().ToTable("EstadoVehiculo");
+            modelBuilder.Entity<InspeccionAccesorio>().ToTable("InspeccionAccesorio");
+            modelBuilder.Entity<InspeccionVehiculo>().ToTable("InspeccionVehiculo");
+            modelBuilder.Entity<Reservacion>().ToTable("Reservacion");
+            modelBuilder.Entity<SolicitudReservacion>().ToTable("SolicitudReservacion");
+            modelBuilder.Entity<TipoInspeccion>().ToTable("TipoInspeccion");
+            modelBuilder.Entity<TipoVehiculo>().ToTable("TipoVehiculo");
+            modelBuilder.Entity<Vehiculo>().ToTable("Vehiculo");
         }
 
     }
