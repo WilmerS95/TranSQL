@@ -9,11 +9,12 @@ namespace TranSQL.shared
 {
     public class TipoInspeccion
     {
-        private int IdTipoInspeccion {  get; set; }
+        [Key]
+        public int IdTipoInspeccion {  get; set; }
 
         [Required]
         [StringLength(75)]
-        private string NombreTipoInsepccion { get; set; } = string.Empty;
+        public string NombreTipoInsepccion { get; set; } = string.Empty;
 
         public TipoInspeccion(string nombreTipoInsepccion)
         {

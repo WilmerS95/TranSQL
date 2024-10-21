@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace TranSQL.shared
 {
     public class Colaborador
     {
+        [Key]
         public int IdColaborador { get; set; }
 
         [Required]
@@ -35,7 +37,8 @@ namespace TranSQL.shared
         [Required]
         public int IdDepartamento { get; set; }
 
-        public Departamento departamento { get; set; }
+        [ForeignKey(nameof(IdDepartamento))]
+        public Departamento Departamento { get; set; }
 
         public Colaborador( string primerNombre, string? segundoNombre, string primerApellido, string? segundoApellido, string? apellidoDeCasada, string correo, int idDepartamento, Departamento departamento)
         {
@@ -47,7 +50,7 @@ namespace TranSQL.shared
             ApellidoDeCasada = apellidoDeCasada;
             Correo = correo ?? throw new ArgumentNullException(nameof(correo));
             IdDepartamento = idDepartamento;
-            this.departamento = departamento ?? throw new ArgumentNullException(nameof(departamento));
+            this.Departamento = departamento ?? throw new ArgumentNullException(nameof(departamento));
         }
 
         public Colaborador()

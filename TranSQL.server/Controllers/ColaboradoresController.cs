@@ -63,7 +63,6 @@ namespace TranSQL.server.Controllers
             return NoContent();
         }
 
-
         // DELETE api/<ColaboradoresController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteColaborador(int id)

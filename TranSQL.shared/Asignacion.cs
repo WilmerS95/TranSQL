@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,12 +9,12 @@ namespace TranSQL.shared
 {
     public class Asignacion
     {
-        private int idAsignacion { get; set; }
-        private int idColaborador { get; set; }
-        private int idEstadoSolicitud {  get; set; }
-
-        private Colaborador colaborador;
-        private EstadoSolicitud estadoSolicitud;
+        [Key]
+        public int idAsignacion { get; set; }
+        public int idColaborador { get; set; }
+        public int idEstadoSolicitud {  get; set; }
+        public Colaborador colaborador;
+        public EstadoSolicitud estadoSolicitud;
 
         public Asignacion(int idAsignacion, int idColaborador, int idEstadoSolicitud, Colaborador colaborador, EstadoSolicitud estadoSolicitud)
         {

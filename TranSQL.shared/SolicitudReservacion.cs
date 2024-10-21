@@ -9,21 +9,22 @@ namespace TranSQL.shared
 {
     public class SolicitudReservacion
     {
-        private int IdSolicitud {  get; set; }
+        [Key]
+        public int IdSolicitud {  get; set; }
 
         [Required]
         [StringLength(300)]
-        private string Motivo { get; set; } = string.Empty;
+        public string Motivo { get; set; } = string.Empty;
 
         [Required]
-        private DateTime Fecha { get; set; }
+        public DateTime Fecha { get; set; }
 
-        private int IdColaborador { get; set; }
-        private int IdEstadoSolicitud { get; set; }
-        private string JustificacionRechazo { get; set; } = string.Empty;
+        public int IdColaborador { get; set; }
+        public int IdEstadoSolicitud { get; set; }
+        public string JustificacionRechazo { get; set; } = string.Empty;
 
-        private Colaborador colaborador;
-        private EstadoSolicitud estadoSolicitud;
+        public Colaborador colaborador;
+        public EstadoSolicitud estadoSolicitud;
 
         public SolicitudReservacion(int idSolicitud, string motivo, DateTime fecha, int idColaborador, int idEstadoSolicitud, string justificacionRechazo, Colaborador colaborador, EstadoSolicitud estadoSolicitud)
         {

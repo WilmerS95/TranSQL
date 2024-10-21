@@ -23,5 +23,11 @@ namespace TranSQL.server
         public DbSet<TipoVehiculo> TipoVehiculos { get; set; }
         public DbSet<Vehiculo> Vehiculos { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Colaborador>().ToTable("Colaborador");
+            modelBuilder.Entity<Departamento>().ToTable("Departamento");
+        }
+
     }
 }
