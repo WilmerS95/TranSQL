@@ -38,6 +38,16 @@ namespace TranSQL.server
             modelBuilder.Entity<TipoInspeccion>().ToTable("TipoInspeccion");
             modelBuilder.Entity<TipoVehiculo>().ToTable("TipoVehiculo");
             modelBuilder.Entity<Vehiculo>().ToTable("Vehiculo");
+
+            modelBuilder.Entity<Vehiculo>()
+                .HasOne(v => v.TipoVehiculo)
+                .WithMany(t => t.Vehiculos)
+                .HasForeignKey(v => v.IdTipoVehiculo);
+
+            modelBuilder.Entity<Vehiculo>()
+                .HasOne(v => v.EstadoVehiculo)
+                .WithMany(e => e.Vehiculos)
+                .HasForeignKey(v => v.IdEstadoVehiculo);
         }
 
     }

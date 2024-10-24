@@ -15,6 +15,8 @@ namespace TranSQL.shared
         [Required]
         [StringLength(100)]
         public string NombreTipoVehiculo { get; set;} = string.Empty;
+        public virtual ICollection<Vehiculo> Vehiculos { get; set; }
+        //public List<Vehiculo>? Vehiculos { get; set; }
 
         public TipoVehiculo(string nombreTipoVehiculo)
         {
