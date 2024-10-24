@@ -1,5 +1,5 @@
 ﻿using System.Net.Http.Json;
-using TranSQL.shared;
+using TranSQL.shared.models;
 
 namespace TranSQL.client.Services
 {

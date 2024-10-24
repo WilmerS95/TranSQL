@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class Colaborador
     {
@@ -35,26 +35,13 @@ namespace TranSQL.shared
         public string Correo { get; set; } = string.Empty;
 
         [Required]
+        [StringLength(100)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
         public int IdDepartamento { get; set; }
 
         [ForeignKey(nameof(IdDepartamento))]
         public Departamento Departamento { get; set; }
-
-        public Colaborador( string primerNombre, string? segundoNombre, string primerApellido, string? segundoApellido, string? apellidoDeCasada, string correo, int idDepartamento, Departamento departamento)
-        {
-            //IdColaborador = idColaborador;
-            PrimerNombre = primerNombre ?? throw new ArgumentNullException(nameof(primerNombre));
-            SegundoNombre = segundoNombre;
-            PrimerApellido = primerApellido ?? throw new ArgumentNullException(nameof(primerApellido));
-            SegundoApellido = segundoApellido;
-            ApellidoDeCasada = apellidoDeCasada;
-            Correo = correo ?? throw new ArgumentNullException(nameof(correo));
-            IdDepartamento = idDepartamento;
-            this.Departamento = departamento ?? throw new ArgumentNullException(nameof(departamento));
-        }
-
-        public Colaborador()
-        {
-        }
     }
 }

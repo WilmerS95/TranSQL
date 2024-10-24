@@ -1,7 +1,9 @@
 using TranSQL.server;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Globalization;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios al contenedor.
@@ -13,6 +15,39 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<TranSQLDbContext>(opciones =>
 {
     opciones.UseSqlServer(builder.Configuration.GetConnectionString("cadenaSQL"));
+});
+
+// Configuración JWT
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]);
+
+builder.Services.AddAuthorization(options =>
+{
+    // Política para permitir acceso solo a Logística
+    options.AddPolicy("LogisticaOnly", policy =>
+    {
+        policy.RequireClaim("Departamento", "Logistica");
+    });
+});
+
+// Agregar autenticación JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+    };
 });
 
 // Configuración de CORS
@@ -47,8 +82,14 @@ if (app.Environment.IsDevelopment())
 // Redirección HTTPS
 app.UseHttpsRedirection();
 
-// Autorización (si tienes middleware de autenticación, este iría antes de la autorización)
+// Habilitar autenticación JWT
+app.UseAuthentication();
+
+// Habilitar autorización (JWT + roles)
 app.UseAuthorization();
+
+//// Autorización (si tienes middleware de autenticación, este iría antes de la autorización)
+//app.UseAuthorization();
 
 // Mapeo de controladores
 app.MapControllers();

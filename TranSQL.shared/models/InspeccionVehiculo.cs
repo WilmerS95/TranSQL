@@ -5,21 +5,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class InspeccionVehiculo
     {
         [Key]
-        public int IdInspeccion {  get; set; }
+        public int IdInspeccion { get; set; }
 
-        public DateTime FechaInspeccion {  set; get; }
+        public DateTime FechaInspeccion { set; get; }
 
         [Required]
         [StringLength(300)]
         public string Observaciones { get; set; } = string.Empty;
         public int OdometroInicial { get; set; }
         public int OdometroFinal { get; set; }
-        public int IdReservacion {  get; set; }
+        public int IdReservacion { get; set; }
         public int IdColaborador { get; set; }
         public int IdAccesorio { get; set; }
         public int IdTipoInspeccion { get; set; }

@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class SolicitudReservacion
     {
         [Key]
-        public int IdSolicitud {  get; set; }
+        public int IdSolicitud { get; set; }
 
         [Required]
         [StringLength(300)]
@@ -23,19 +23,19 @@ namespace TranSQL.shared
         public int IdEstadoSolicitud { get; set; }
         public string JustificacionRechazo { get; set; } = string.Empty;
 
-        public Colaborador colaborador;
-        public EstadoSolicitud estadoSolicitud;
+        public Colaborador Colaborador { get; set; }
+        public EstadoSolicitud EstadoSolicitud { get; set; }
 
         public SolicitudReservacion(int idSolicitud, string motivo, DateTime fecha, int idColaborador, int idEstadoSolicitud, string justificacionRechazo, Colaborador colaborador, EstadoSolicitud estadoSolicitud)
         {
             IdSolicitud = idSolicitud;
             Motivo = motivo ?? throw new ArgumentNullException(nameof(motivo));
-            this.Fecha = fecha;
-            this.IdColaborador = idColaborador;
-            this.IdEstadoSolicitud = idEstadoSolicitud;
-            this.JustificacionRechazo = justificacionRechazo ?? throw new ArgumentNullException(nameof(justificacionRechazo));
-            this.colaborador = colaborador ?? throw new ArgumentNullException(nameof(colaborador));
-            this.estadoSolicitud = estadoSolicitud ?? throw new ArgumentNullException(nameof(estadoSolicitud));
+            Fecha = fecha;
+            IdColaborador = idColaborador;
+            IdEstadoSolicitud = idEstadoSolicitud;
+            JustificacionRechazo = justificacionRechazo ?? throw new ArgumentNullException(nameof(justificacionRechazo));
+            Colaborador = colaborador ?? throw new ArgumentNullException(nameof(colaborador));
+            EstadoSolicitud = estadoSolicitud ?? throw new ArgumentNullException(nameof(estadoSolicitud));
         }
 
         public SolicitudReservacion()

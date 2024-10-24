@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class Asignacion
     {
         [Key]
         public int idAsignacion { get; set; }
         public int idColaborador { get; set; }
-        public int idEstadoSolicitud {  get; set; }
+        public int idEstadoSolicitud { get; set; }
         public Colaborador colaborador;
         public EstadoSolicitud estadoSolicitud;
 

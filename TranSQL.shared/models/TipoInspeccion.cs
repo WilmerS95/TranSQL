@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class TipoInspeccion
     {
         [Key]
-        public int IdTipoInspeccion {  get; set; }
+        public int IdTipoInspeccion { get; set; }
 
         [Required]
         [StringLength(75)]

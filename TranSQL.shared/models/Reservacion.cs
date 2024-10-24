@@ -6,25 +6,25 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class Reservacion
     {
         [Key]
-        public int IdReservacion {  get; set; }
+        public int IdReservacion { get; set; }
 
         [Required]
         public DateTime FechaReservacion { get; set; }
 
         [Required]
-        public DateTime FechaInicio {  get; set; }
+        public DateTime FechaInicio { get; set; }
 
         [Required]
-        public DateTime FechaFin {  get; set; }
+        public DateTime FechaFin { get; set; }
 
         [Required]
         [StringLength(300)]
-        public string Observaciones {  get; set; } = string.Empty;
+        public string Observaciones { get; set; } = string.Empty;
         public int IdSolicitud { get; set; }
 
         public string Placa { get; set; } = string.Empty;

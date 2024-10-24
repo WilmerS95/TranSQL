@@ -5,19 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class Vehiculo
     {
         [Key]
         [Required]
         [StringLength(10)]
-        public string Placa {  get; set; } = string.Empty;
+        public string Placa { get; set; } = string.Empty;
         [Required]
         public int Modelo { get; set; }
         public int OdometroInicial { get; set; }
         public int OdometroFinal { get; set; }
-        public int IdTipoVehiculo {  get; set; }
+        public int IdTipoVehiculo { get; set; }
         public int IdEstadoVehiculo { get; set; }
         public TipoVehiculo TipoVehiculo { get; set; }
         public EstadoVehiculo EstadoVehiculo { get; set; }

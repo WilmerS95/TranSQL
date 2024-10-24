@@ -5,16 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TranSQL.shared
+namespace TranSQL.shared.models
 {
     public class EstadoSolicitud
     {
         [Key]
-        public int IdEstadoSolicitud {  get; set; }
+        public int IdEstadoSolicitud { get; set; }
 
         [Required]
         [StringLength(50)]
-        public string NombreEstadoSolicitud { get; set;} = string.Empty;
+        public string NombreEstadoSolicitud { get; set; } = string.Empty;
 
         public EstadoSolicitud(string nombreEstadoSolicitud)
         {

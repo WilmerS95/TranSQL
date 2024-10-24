@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TranSQL.shared;
+using TranSQL.shared.models;
 
 namespace TranSQL.server
 {
