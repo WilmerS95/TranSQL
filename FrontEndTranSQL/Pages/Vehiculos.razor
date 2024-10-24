@@ -1,6 +1,6 @@
-﻿@    using TranSQL.client.Services
-@    using TranSQL.shared;
-    using TranSQL.shared.models
+﻿@using TranSQL.client.Services;
+@using TranSQL.shared;
+@using TranSQL.shared.models;
 
 @page "/vehiculos"
 @inject VehiculoService vehiculoService
@@ -36,8 +36,10 @@ else
                     <td>@vehiculo.Modelo</td>
                     <td>@vehiculo.OdometroInicial</td>
                     <td>@vehiculo.OdometroFinal</td>
-                    <td>@vehiculo.TipoVehiculo.NombreTipoVehiculo</td>
-                    <td>@vehiculo.EstadoVehiculo.NombreEstadoVehiculo</td>
+                    <!-- Verificación si tipoVehiculo es nulo -->
+                    <td>@(vehiculo.TipoVehiculo?.NombreTipoVehiculo ?? "Sin tipo")</td>
+                    <!-- Verificación si estadoVehiculo es nulo -->
+                    <td>@(vehiculo.EstadoVehiculo?.NombreEstadoVehiculo ?? "Sin estado")</td>
                 </tr>
             }
         </tbody>

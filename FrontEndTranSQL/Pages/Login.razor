@@ -1,0 +1,61 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using Blazored.LocalStorage
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+
+
+@page "/login"
+@inject HttpClient Http
+@inject TokenAuthenticationStateProvider AuthenticationStateProvider
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+@inject SweetAlertService Swal
+
+<h3>Iniciar sesión</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="username">Correo electrónico</label>
+        <InputText id="username" @bind-Value="loginModel.Username" />
+    </div>
+
+    <div>
+        <label for="password">Contraseña</label>
+        <InputText id="password" @bind-Value="loginModel.Password" type="password" />
+    </div>
+
+    <button type="submit">Iniciar sesión</button>
+</EditForm>
+
+@code {
+    private LoginRequestDTO loginModel = new LoginRequestDTO();
+
+    private async Task HandleLogin()
+    {
+        var response = await Http.PostAsJsonAsync("api/auth/login", loginModel);
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginResponseDTO>();
+            await LocalStorage.SetItemAsync("authToken", result.Token);
+
+            AuthenticationStateProvider.MarkUserAsAuthenticated(result.Token);
+            Http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.Token);
+
+            // Redirige al usuario a la página de reservaciones después de iniciar sesión
+            NavigationManager.NavigateTo("/reservaciones");
+        }
+        else
+        {
+            // Mostrar alerta SweetAlert2 en caso de error de autenticación
+            await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Error de autenticación",
+                Text = "Las credenciales no son válidas, por favor verifica tu correo y contraseña.",
+                Icon = SweetAlertIcon.Error
+            });
+        }
+    }
+}
