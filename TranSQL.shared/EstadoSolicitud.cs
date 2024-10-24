@@ -9,11 +9,12 @@ namespace TranSQL.shared
 {
     public class EstadoSolicitud
     {
-        private int IdEstadoSolicitud {  get; set; }
+        [Key]
+        public int IdEstadoSolicitud {  get; set; }
 
         [Required]
         [StringLength(50)]
-        private string NombreEstadoSolicitud { get; set;} = string.Empty;
+        public string NombreEstadoSolicitud { get; set;} = string.Empty;
 
         public EstadoSolicitud(string nombreEstadoSolicitud)
         {
