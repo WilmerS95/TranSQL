@@ -16,7 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.1" />
+=======
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+>>>>>>> 8b7a2079a4c907edee25624b77ac1280158e2ef1
   </ItemGroup>
 
 </Project>

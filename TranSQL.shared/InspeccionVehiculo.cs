@@ -9,24 +9,25 @@ namespace TranSQL.shared
 {
     public class InspeccionVehiculo
     {
-        private int IdInspeccion {  get; set; }
+        [Key]
+        public int IdInspeccion {  get; set; }
 
-        private DateTime FechaInspeccion {  set; get; }
+        public DateTime FechaInspeccion {  set; get; }
 
         [Required]
         [StringLength(300)]
-        private string Observaciones { get; set; } = string.Empty;
-        private int OdometroInicial { get; set; }
-        private int OdometroFinal { get; set; }
-        private int IdReservacion {  get; set; }
-        private int IdColaborador { get; set; }
-        private int IdAccesorio { get; set; }
-        private int IdTipoInspeccion { get; set; }
+        public string Observaciones { get; set; } = string.Empty;
+        public int OdometroInicial { get; set; }
+        public int OdometroFinal { get; set; }
+        public int IdReservacion {  get; set; }
+        public int IdColaborador { get; set; }
+        public int IdAccesorio { get; set; }
+        public int IdTipoInspeccion { get; set; }
 
-        private Reservacion reservacion;
-        private Colaborador colaborador;
-        private Accesorio accesorio;
-        private TipoInspeccion tipoInspeccion;
+        public Reservacion reservacion;
+        public Colaborador colaborador;
+        public Accesorio accesorio;
+        public TipoInspeccion tipoInspeccion;
 
         public InspeccionVehiculo(int idInspeccion, DateTime fechaInspeccion, string observaciones, int odometroInicial, int odometroFinal, int idReservacion, int idColaborador, int idAccesorio, int idTipoInspeccion, Reservacion reservacion, Colaborador colaborador, Accesorio accesorio, TipoInspeccion tipoInspeccion)
         {
