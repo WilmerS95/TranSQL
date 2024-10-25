@@ -1,0 +1,51 @@
+﻿@page "/vehiculos"
+@inject ApiService ApiService
+
+<h3>Vehículos</h3>
+
+@if (vehiculos == null)
+{
+    <p><em>Cargando vehículos...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var vehiculo in vehiculos)
+        {
+            <li>@vehiculo.Placa - @vehiculo.TipoVehiculo</li>
+        }
+    </ul>
+}
+
+<button @onclick="ShowAddVehiculoModal">Agregar Vehículo</button>
+
+@if (showAddModal)
+{
+    <EditVehiculoModal @bind-Visible="showAddModal" OnSave="AddVehiculo" />
+}
+
+@code {
+    private List<Vehiculo> vehiculos;
+    private bool showAddModal;
+
+    // Carga los vehículos al inicializar la página
+    protected override async Task OnInitializedAsync()
+    {
+        vehiculos = await ApiService.GetVehiculosAsync();
+    }
+
+    // Muestra el modal para agregar un nuevo vehículo
+    private void ShowAddVehiculoModal()
+    {
+        showAddModal = true;
+    }
+
+    // Agrega un nuevo vehículo a la lista
+    private async Task AddVehiculo(Vehiculo vehiculo)
+    {
+        await ApiService.CreateVehiculoAsync(vehiculo);
+        vehiculos = await ApiService.GetVehiculosAsync();
+        showAddModal = false;
+    }
+}
+
