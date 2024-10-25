@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TranSQL.shared.models
 {
@@ -14,16 +12,19 @@ namespace TranSQL.shared.models
 
         [Required]
         [StringLength(300)]
-        public string Motivo { get; set; } = string.Empty;
+        public string? Motivo { get; set; } = string.Empty;
 
         [Required]
         public DateTime Fecha { get; set; }
 
-        public int IdColaborador { get; set; }
-        public int IdEstadoSolicitud { get; set; }
-        public string JustificacionRechazo { get; set; } = string.Empty;
+        public int? IdColaborador { get; set; }
+        public int? IdEstadoSolicitud { get; set; }
+        public string? JustificacionRechazo { get; set; }
 
+        [ForeignKey("IdColaborador")]
         public Colaborador Colaborador { get; set; }
+
+        [ForeignKey("IdEstadoSolicitud")]
         public EstadoSolicitud EstadoSolicitud { get; set; }
 
         public SolicitudReservacion(int idSolicitud, string motivo, DateTime fecha, int idColaborador, int idEstadoSolicitud, string justificacionRechazo, Colaborador colaborador, EstadoSolicitud estadoSolicitud)

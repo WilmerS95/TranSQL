@@ -1,0 +1,64 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using TranSQL.shared.DTO
+@using System.Security.Claims
+@page "/solicitud-reservacion"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Solicitar Reservación</h3>
+
+<EditForm Model="nuevaSolicitud" OnValidSubmit="EnviarSolicitud">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="motivo">Motivo</label>
+        <InputTextArea id="motivo" class="form-control" @bind-Value="nuevaSolicitud.Motivo" />
+    </div>
+
+    <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <InputDate id="fecha" class="form-control" @bind-Value="nuevaSolicitud.Fecha" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+</EditForm>
+
+@code {
+    private SolicitudReservacionDTO nuevaSolicitud = new SolicitudReservacionDTO();
+
+    private async Task EnviarSolicitud()
+    {
+        // Obtener el estado de autenticación actual
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Obtener el IdColaborador del claim si el usuario está autenticado
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var idColaboradorClaim = user.FindFirst("IdColaborador")?.Value;
+            if (int.TryParse(idColaboradorClaim, out var idColaborador))
+            {
+                nuevaSolicitud.IdColaborador = idColaborador;
+            }
+            else
+            {
+                Console.WriteLine("Error: IdColaborador no está presente en el token o no es válido.");
+                return;
+            }
+        }
+
+        // Enviar la solicitud de reservación
+        var response = await Http.PostAsJsonAsync("api/solicitudesreservacion", nuevaSolicitud);
+        if (response.IsSuccessStatusCode)
+        {
+            // Redirigir después de enviar la solicitud
+            NavigationManager.NavigateTo("/solicitudes");
+        }
+        else
+        {
+            Console.WriteLine("Error al enviar la solicitud.");
+        }
+    }
+}

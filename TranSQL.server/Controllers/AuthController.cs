@@ -61,6 +61,7 @@ namespace TranSQL.server.Controllers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Correo),
                 new Claim("Departamento", user.Departamento),  // Rol basado en departamento
+                new Claim("IdColaborador", user.IdColaborador.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

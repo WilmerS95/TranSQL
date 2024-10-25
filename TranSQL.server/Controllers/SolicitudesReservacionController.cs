@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TranSQL.shared.models;
+using TranSQL.shared.Services;
+using TranSQL.shared.DTO;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,17 +13,43 @@ namespace TranSQL.server.Controllers
     public class SolicitudesReservacionController : ControllerBase
     {
         private readonly TranSQLDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public SolicitudesReservacionController(TranSQLDbContext context)
+        public SolicitudesReservacionController(TranSQLDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: api/<SolicitudesReservacionController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SolicitudReservacion>>> GetSolicitudesReservacion()
         {
-            return await _context.SolicitudesReservacion.ToListAsync();
+            var solicitudes = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador)
+                    .ThenInclude(c => c.Departamento)
+                .Include(s => s.EstadoSolicitud)
+                .ToListAsync();
+
+            return Ok(solicitudes);
+        }
+
+        [HttpGet("colaborador/{idColaborador}")]
+        public async Task<ActionResult<IEnumerable<SolicitudReservacion>>> GetSolicitudesPorColaborador(int idColaborador)
+        {
+            var solicitudes = await _context.SolicitudesReservacion
+                .Where(s => s.IdColaborador == idColaborador)
+                .Include(s => s.Colaborador)
+                    .ThenInclude(c => c.Departamento)
+                .Include(s => s.EstadoSolicitud)
+                .ToListAsync();
+
+            if (solicitudes == null || !solicitudes.Any())
+            {
+                return NotFound($"No se encontraron solicitudes para el colaborador con Id {idColaborador}.");
+            }
+
+            return Ok(solicitudes);
         }
 
         // GET api/<SolicitudesReservacionController>/5
@@ -40,13 +68,21 @@ namespace TranSQL.server.Controllers
 
         // POST api/<SolicitudesReservacionController>
         [HttpPost]
-        public async Task<ActionResult<SolicitudReservacion>> PostSolicitudReservacion(SolicitudReservacion solicitudReservacion)
+        public async Task<ActionResult<SolicitudReservacion>> PostSolicitudReservacion(SolicitudReservacionDTO solicitudDto)
         {
+            // Mapea el DTO al modelo principal
+            var solicitudReservacion = new SolicitudReservacion
+            {
+                Motivo = solicitudDto.Motivo,
+                Fecha = solicitudDto.Fecha,
+                IdColaborador = solicitudDto.IdColaborador,
+                IdEstadoSolicitud = 3
+            };
+
             _context.SolicitudesReservacion.Add(solicitudReservacion);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetSolicitudReservacion", new { id = solicitudReservacion.IdSolicitud }, solicitudReservacion);
-
+            return CreatedAtAction(nameof(GetSolicitudReservacion), new { id = solicitudReservacion.IdSolicitud }, solicitudReservacion);
         }
 
         // PUT api/<SolicitudesReservacionController>/5
