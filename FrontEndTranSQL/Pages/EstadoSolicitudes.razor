@@ -1,4 +1,8 @@
-﻿@page "/estado-solicitudes"
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@page "/estado-solicitudes"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -8,43 +12,12 @@
                     <h3 class="card-title mb-0">
                         <i class="bi bi-file-earmark-check me-2"></i> Gestión de Estado de Solicitudes
                     </h3>
-                    <button class="btn btn-outline-light" @onclick="CrearNuevaSolicitud">
+                    <button class="btn btn-outline-light" @onclick="IrASolicitudReservacion">
                         <i class="bi bi-plus-circle me-1"></i> Nueva Solicitud
                     </button>
                 </div>
-                <div class="card-body">
-                    <table class="table table-hover table-striped table-bordered align-middle text-center">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#</th>
-                                <th>Tipo de Solicitud</th>
-                                <th>Fecha</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @* Aquí agregarás el código para iterar sobre las solicitudes *@
-                            <tr>
-                                <td>1</td>
-                                <td>Reservación de Vehículo</td>
-                                <td>2024-10-25</td>
-                                <td>
-                                    <span class="badge bg-success">Aprobada</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm me-2" @onclick="VerDetalles">
-                                        <i class="bi bi-eye"></i> Ver
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" @onclick="CancelarSolicitud">
-                                        <i class="bi bi-x-circle"></i> Cancelar
-                                    </button>
-                                </td>
-                            </tr>
-                            @* Puedes iterar sobre una lista de solicitudes aquí *@
-                        </tbody>
-                    </table>
-                </div>
+                <Solicitudes/>
+                
             </div>
         </div>
     </div>
@@ -65,4 +38,6 @@
     {
         // Lógica para cancelar una solicitud
     }
+
+    private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
 }
