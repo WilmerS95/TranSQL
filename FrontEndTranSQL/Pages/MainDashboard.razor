@@ -8,49 +8,75 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 
-<h3>Dashboard</h3>
+<div class="container mt-5">
+    <h3 class="text-center">Dashboard</h3>
 
-@if (isLogistica)
-{
-<h4>Opciones para el Departamento de Logística:</h4>
-<ul>
-    <li><a @onclick="IrAReservaciones">Gestionar Reservaciones</a></li>
-    <li><a @onclick="IrAAsignaciones">Asignar Vehículos</a></li>
-    <li><a @onclick="IrAInspecciones">Gestionar Inspecciones</a></li>
-    <li><a @onclick="IrAReportes">Generar Reportes</a></li>
-</ul>
-}
-else
-{
-<h4>Opciones para Otros Departamentos:</h4>
-<ul>
-    <li><a @onclick="IrAReservaciones">Solicitar Reservación</a></li>
-    <li><a @onclick="VerEstadoSolicitudes">Ver Estado de tus Solicitudes</a></li>
-</ul>
-}
-
-@code {
-private bool isLogistica;
-
-protected override async Task OnInitializedAsync()
-{
-    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-    var user = authState.User;
-
-    if (user.Identity != null && user.Identity.IsAuthenticated)
+    @if (isLogistica)
     {
-        var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
-        isLogistica = departamentoClaim == "Logistica";
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4>Opciones para el Departamento de Logística</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-primary w-100" @onclick="IrAReservaciones">Gestionar Reservaciones</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-primary w-100" @onclick="IrAAsignaciones">Asignar Vehículos</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-primary w-100" @onclick="IrAInspecciones">Gestionar Inspecciones</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-primary w-100" @onclick="IrAReportes">Generar Reportes</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
     }
     else
     {
-        NavigationManager.NavigateTo("/login");
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h4>Opciones para Otros Departamentos</h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-success w-100" @onclick="IrAReservaciones">Solicitar Reservación</button>
+                    </li>
+                    <li class="list-group-item">
+                        <button class="btn btn-outline-success w-100" @onclick="VerEstadoSolicitudes">Ver Estado de tus Solicitudes</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
     }
-}
+</div>
 
-private void IrAReservaciones() => NavigationManager.NavigateTo("/reservaciones");
-private void IrAAsignaciones() => NavigationManager.NavigateTo("/asignaciones");
-private void IrAInspecciones() => NavigationManager.NavigateTo("/inspecciones");
-private void IrAReportes() => NavigationManager.NavigateTo("/reportes");
-private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
+@code {
+    private bool isLogistica;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
+            isLogistica = departamentoClaim == "Logistica";
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+    private void IrAReservaciones() => NavigationManager.NavigateTo("/reservaciones");
+    private void IrAAsignaciones() => NavigationManager.NavigateTo("/asignaciones");
+    private void IrAInspecciones() => NavigationManager.NavigateTo("/inspecciones");
+    private void IrAReportes() => NavigationManager.NavigateTo("/reportes");
+    private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
 }
