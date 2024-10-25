@@ -1,7 +1,54 @@
 ﻿@page "/asignaciones"
 
-<h3>Gestión de Asignaciones</h3>
+<!-- Bootstrap y Font Awesome para íconos -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container my-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="fas fa-tasks"></i> Gestión de Asignaciones</h3>
+            <button class="btn btn-light" title="Nueva Asignación">
+                <i class="fas fa-plus"></i> Nueva Asignación
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="lead">
+                Administra las asignaciones de manera eficiente. Agrega, edita y organiza las tareas fácilmente.
+            </p>
+            
+            <table class="table table-hover mt-4">
+                <thead class="thead-light">
+                    <tr>
+                        <th><i class="fas fa-list-ol"></i> ID</th>
+                        <th><i class="fas fa-clipboard"></i> Título</th>
+                        <th><i class="fas fa-calendar-alt"></i> Fecha</th>
+                        <th><i class="fas fa-user"></i> Asignado a</th>
+                        <th><i class="fas fa-cogs"></i> Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Placeholder para futuras asignaciones -->
+                    <tr>
+                        <td>1</td>
+                        <td>Asignación de ejemplo</td>
+                        <td>2024-10-26</td>
+                        <td>Juan Pérez</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 @code {
-
+    // Backend C# code here if necessary
 }
