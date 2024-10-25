@@ -1,0 +1,40 @@
+﻿@page "/vehiculos"
+@inject VehiculoService VehiculoService
+
+<h3>Lista de Vehículos</h3>
+
+@if (vehiculos == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var vehiculo in vehiculos)
+        {
+            <li>@vehiculo.Placa - Modelo: @vehiculo.Modelo</li>
+        }
+    </ul>
+}
+
+<h3>Agregar Vehículo</h3>
+<input type="text" @bind="newVehiculo.Placa" placeholder="Placa" />
+<input type="number" @bind="newVehiculo.Modelo" placeholder="Modelo" />
+<button @onclick="AddVehiculo">Agregar</button>
+
+@code {
+    private List<Vehiculo> vehiculos;
+    private Vehiculo newVehiculo = new Vehiculo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        vehiculos = await VehiculoService.GetVehiculosAsync();
+    }
+
+    private async Task AddVehiculo()
+    {
+        await VehiculoService.AddVehiculoAsync(newVehiculo);
+        newVehiculo = new Vehiculo(); // Reset the new vehicle
+        vehiculos = await VehiculoService.GetVehiculosAsync(); // Refresh the list
+    }
+}
