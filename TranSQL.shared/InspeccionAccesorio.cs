@@ -19,9 +19,9 @@ namespace TranSQL.shared
         public InspeccionVehiculo inspeccionVehiculo;
         public Accesorio accesorio;
 
-        public InspeccionAccesorio(int idInspeccion, int idAccesorio, string estadoAccesorio, InspeccionVehiculo inspeccionVehiculo, Accesorio accesorio)
+        public InspeccionAccesorio(/*int idInspeccion*//*,*/ int idAccesorio, string estadoAccesorio, InspeccionVehiculo inspeccionVehiculo, Accesorio accesorio)
         {
-            IdInspeccion = idInspeccion;
+            //IdInspeccion = idInspeccion;
             IdAccesorio = idAccesorio;
             EstadoAccesorio = estadoAccesorio ?? throw new ArgumentNullException(nameof(estadoAccesorio));
             this.inspeccionVehiculo = inspeccionVehiculo ?? throw new ArgumentNullException(nameof(inspeccionVehiculo));
