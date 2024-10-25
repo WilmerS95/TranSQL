@@ -1,0 +1,87 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@page "/solicitudes"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Mis Solicitudes de Reservación</h3>
+
+@if (solicitudes != null && solicitudes.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Motivo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var solicitud in solicitudes)
+            {
+                <tr>
+                    <td>@solicitud.Motivo</td>
+                    <td>@solicitud.Fecha.ToShortDateString()</td>
+                    <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarSolicitud(solicitud.IdSolicitud)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No tienes solicitudes de reservación.</p>
+}
+
+@code {
+    private List<SolicitudReservacionDTO> solicitudes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Extraer IdColaborador del claim
+        var idColaborador = user.FindFirst("IdColaborador")?.Value;
+
+        if (!string.IsNullOrEmpty(idColaborador))
+        {
+            // Cargar solicitudes del colaborador logueado usando su ID
+            solicitudes = await Http.GetFromJsonAsync<List<SolicitudReservacionDTO>>($"api/solicitudesreservacion/colaborador/{idColaborador}");
+        }
+    }
+
+    private async Task EliminarSolicitud(int idSolicitud)
+    {
+        var response = await Http.DeleteAsync($"api/solicitudesreservacion/{idSolicitud}");
+        if (response.IsSuccessStatusCode)
+        {
+            solicitudes.RemoveAll(s => s.IdSolicitud == idSolicitud);
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Error al eliminar la solicitud.");
+        }
+    }
+
+    public class SolicitudReservacionDTO
+    {
+        public int IdSolicitud { get; set; }
+        public string Motivo { get; set; }
+        public DateTime Fecha { get; set; }
+        public string JustificacionRechazo { get; set; }
+        public EstadoSolicitudDTO EstadoSolicitud { get; set; }
+    }
+
+    public class EstadoSolicitudDTO
+    {
+        public int IdEstadoSolicitud { get; set; }
+        public string NombreEstadoSolicitud { get; set; }
+    }
+}

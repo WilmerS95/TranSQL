@@ -22,6 +22,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, TokenAuthenticationState
 builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<TokenAuthenticationStateProvider>());
 
 builder.Services.AddScoped<VehiculoService>();
+builder.Services.AddScoped<ReservacionService>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddSweetAlert2();
 

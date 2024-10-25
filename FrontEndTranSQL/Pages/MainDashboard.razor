@@ -26,8 +26,12 @@
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Solicitar Reservacion</span>
+                                <button class="btn btn-outline-primary btn-sm" @onclick="IrASolicitudReservacion">Ir</button>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Gestionar Reservaciones</span>
-                                <button class="btn btn-outline-primary btn-sm" @onclick="IrAReservaciones">Ir</button>
+                                <button class="btn btn-outline-primary btn-sm" @onclick="IrASolicitudes">Ir</button>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Asignar Vehículos</span>
@@ -41,6 +45,7 @@
                                 <span>Generar Reportes</span>
                                 <button class="btn btn-outline-primary btn-sm" @onclick="IrAReportes">Ir</button>
                             </li>
+                            
                         </ul>
                     </div>
                 </div>
@@ -55,8 +60,12 @@
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Solicitar Reservación</span>
-                                <button class="btn btn-outline-success btn-sm" @onclick="IrAReservaciones">Ir</button>
+                                <span>Solicitar Reservacion</span>
+                                <button class="btn btn-outline-primary btn-sm" @onclick="IrASolicitudReservacion">Ir</button>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Solicitudes de reservación</span>
+                                <button class="btn btn-outline-success btn-sm" @onclick="IrASolicitudes">Ir</button>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span>Ver Estado de tus Solicitudes</span>
@@ -72,6 +81,7 @@
 
 @code {
     private bool isLogistica;
+    private int idColaborador;
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,6 +92,11 @@
         {
             var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
             isLogistica = departamentoClaim == "Logistica";
+            var idColaboradorClaim = user.Claims.FirstOrDefault(c => c.Type == "IdColaborador")?.Value;
+            if (int.TryParse(idColaboradorClaim, out var id))
+            {
+                idColaborador = id;
+            }
         }
         else
         {
@@ -94,4 +109,6 @@
     private void IrAInspecciones() => NavigationManager.NavigateTo("/inspecciones");
     private void IrAReportes() => NavigationManager.NavigateTo("/reportes");
     private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
+    private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
+    private void IrASolicitudes() => NavigationManager.NavigateTo($"/solicitudes?idColaborador={idColaborador}");
 }

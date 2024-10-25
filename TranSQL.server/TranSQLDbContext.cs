@@ -48,6 +48,25 @@ namespace TranSQL.server
                 .HasOne(v => v.EstadoVehiculo)
                 .WithMany(e => e.Vehiculos)
                 .HasForeignKey(v => v.IdEstadoVehiculo);
+
+            modelBuilder.Entity<SolicitudReservacion>()
+        .HasOne(s => s.Colaborador)
+        .WithMany()  
+        .HasForeignKey(s => s.IdColaborador)
+        .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<SolicitudReservacion>()
+        .Property(s => s.Motivo)
+        .IsRequired(false);
+
+            modelBuilder.Entity<SolicitudReservacion>()
+                .HasOne(s => s.EstadoSolicitud)
+                .WithMany()  
+                .HasForeignKey(s => s.IdEstadoSolicitud)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuración adicional de las tablas
+            base.OnModelCreating(modelBuilder);
         }
 
     }

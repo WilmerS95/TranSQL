@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TranSQL.shared.Services;
 using System.Globalization;
+using TranSQL.client.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios al contenedor.
@@ -62,9 +64,11 @@ builder.Services.AddCors(options =>
         policyBuilder.WithOrigins(allowedOrigins)
                      .AllowAnyMethod()
                      .AllowAnyHeader()
-                     .AllowCredentials(); // Requiere que los orígenes sean específicos
+                     .AllowCredentials();
     });
 });
+
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
