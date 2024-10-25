@@ -21,14 +21,18 @@ namespace TranSQL.server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Colaborador>>> GetColaboradores()
         {
-            return await _context.Colaboradores.ToListAsync();
+            return await _context.Colaboradores
+                .Include(c => c.Departamento)
+                .ToListAsync();
         }
 
         // GET api/<ColaboradoresController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Colaborador>> GetColaborador(int id)
         {
-            var colaborador = await _context.Colaboradores.FindAsync(id);
+            var colaborador = await _context.Colaboradores
+               .Include(c => c.Departamento)
+               .FirstOrDefaultAsync(c => c.IdColaborador == id);
 
             if (colaborador == null)
             {

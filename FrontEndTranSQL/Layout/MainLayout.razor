@@ -1,17 +1,63 @@
-﻿@inherits LayoutComponentBase
+﻿@using TranSQL.client.Services
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject TokenAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inherits LayoutComponentBase
+
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        @if (isAuthenticated)
+        {
+            <button class="btn btn-danger" @onclick="HandleLogout">
+                Logout
+            </button>
+            <button class="btn btn-primary" @onclick="IrHome">
+                Home
+            </button>
+        }
     </div>
 
     <main>
-        <div class="top-row px-4">
-            @* <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">TranSQL</a> *@
-            @* <a href="https://localhost:7221/main-dashboard" target="_blank">Dashboard</a> *@
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+        @Body
     </main>
 </div>
+
+@code {
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged += AuthStateChanged;
+        await CheckAuthenticationAsync();
+    }
+
+    private async Task CheckAuthenticationAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        StateHasChanged();
+    }
+
+    private async void AuthStateChanged(Task<AuthenticationState> task)
+    {
+        await CheckAuthenticationAsync();
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthStateProvider.LogoutAsync();
+        NavigationManager.NavigateTo("/login", forceLoad: true);
+    }
+
+    private void IrHome()
+    {
+        NavigationManager.NavigateTo("/main-dashboard");
+    }
+
+    public void Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= AuthStateChanged;
+    }
+}

@@ -19,6 +19,30 @@ namespace TranSQL.client.Services
             _anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
+        public async Task LoginAsync(string token)
+        {
+            await _localStorageService.SetItemAsync("authToken", token);
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var claims = ParseClaimsFromJwt(token);
+            var authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(claims, "jwtAuthType"));
+            var authState = Task.FromResult(new AuthenticationState(authenticatedUser));
+
+            NotifyAuthenticationStateChanged(authState);
+        }
+
+        public async Task LogoutAsync()
+        {
+            await _localStorageService.RemoveItemAsync("authToken");
+
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+
+            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+            var authState = Task.FromResult(new AuthenticationState(anonymousUser));
+            NotifyAuthenticationStateChanged(authState);
+        }
+
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var token = await _localStorageService.GetItemAsync<string>("authToken");
