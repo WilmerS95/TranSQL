@@ -66,6 +66,51 @@ namespace TranSQL.server.Controllers
             return solicitudReservacion;
         }
 
+        [HttpGet("pendientes")]
+        public async Task<ActionResult<IEnumerable<SolicitudReservacion>>> GetSolicitudesPendientes()
+        {
+            var solicitudesPendientes = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador)
+                .Include(s => s.EstadoSolicitud)
+                .Where(s => s.IdEstadoSolicitud == 3)
+                .ToListAsync();
+
+            return Ok(solicitudesPendientes);
+        }
+
+        [HttpPost("aceptar/{id}")]
+        public async Task<IActionResult> AceptarSolicitud(int id, [FromBody] AprobacionSolicitudDTO aprobacionDto)
+        {
+            var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
+            if (solicitud == null)
+                return NotFound();
+
+            solicitud.IdEstadoSolicitud = 1;
+            solicitud.Motivo = aprobacionDto.MotivoAprobacion;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPost("rechazar/{id}")]
+        public async Task<IActionResult> RechazarSolicitud(int id, [FromBody] RechazoSolicitudDTO rechazoDto)
+        {
+            if (string.IsNullOrWhiteSpace(rechazoDto.MotivoRechazo))
+            {
+                return BadRequest("El motivo de rechazo es obligatorio.");
+            }
+
+            var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
+            if (solicitud == null)
+                return NotFound();
+
+            solicitud.IdEstadoSolicitud = 2;
+            solicitud.Motivo = rechazoDto.MotivoRechazo;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         // POST api/<SolicitudesReservacionController>
         [HttpPost]
         public async Task<ActionResult<SolicitudReservacion>> PostSolicitudReservacion(SolicitudReservacionDTO solicitudDto)

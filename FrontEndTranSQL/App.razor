@@ -6,8 +6,7 @@
             <NotAuthorized>
                 @if (!isAuthenticated)
                 {
-                    <!-- Redirigir al login si no está autenticado -->
-                    @NavigateToLogin()
+                    <RedirectToLogin />
                 }
                 else
                 {
@@ -33,12 +32,18 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Verificar si el usuario está autenticado
+        // Verificar si el usuario está autenticado al cargar la aplicación
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         isAuthenticated = authState.User.Identity != null && authState.User.Identity.IsAuthenticated;
+
+        // Redirigir al login si no está autenticado y la URL actual es la base ("/")
+        if (!isAuthenticated && NavigationManager.Uri == NavigationManager.BaseUri)
+        {
+            NavigationManager.NavigateTo("/login", true);
+        }
     }
 
-    private RenderFragment NavigateToLogin() => builder =>
+    private RenderFragment RedirectToLogin => builder =>
     {
         NavigationManager.NavigateTo("/login", true);
     };

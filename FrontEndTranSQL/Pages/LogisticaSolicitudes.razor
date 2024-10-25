@@ -1,0 +1,87 @@
+﻿@page "/logistica-solicitudes"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Gestión de Solicitudes - Logística</h3>
+
+@if (solicitudes != null && solicitudes.Any())
+{
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Motivo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var solicitud in solicitudes)
+            {
+                <tr>
+                    <td>@solicitud.Motivo</td>
+                    <td>@solicitud.Fecha.ToShortDateString()</td>
+                    <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
+                    <td>
+                        <button class="btn btn-success btn-sm me-2" @onclick="() => ShowModalAceptar(solicitud.IdSolicitud)">Aceptar</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ShowModalRechazar(solicitud.IdSolicitud)">Rechazar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No hay solicitudes pendientes.</p>
+}
+
+<!-- Referencias a los componentes modales -->
+<AceptarSolicitudModal @ref="aprobarSolicitudModal" OnAprobado="RecargarSolicitudes" />
+<RechazarSolicitudModal @ref="rechazarSolicitudModal" OnRechazado="RecargarSolicitudes" />
+
+@code {
+    private List<SolicitudReservacionDTO> solicitudes = new();
+    private AceptarSolicitudModal aprobarSolicitudModal;
+    private RechazarSolicitudModal rechazarSolicitudModal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarSolicitudes();
+    }
+
+    private async Task CargarSolicitudes()
+    {
+        solicitudes = await Http.GetFromJsonAsync<List<SolicitudReservacionDTO>>("api/solicitudesreservacion/pendientes");
+    }
+
+    private void ShowModalAceptar(int idSolicitud)
+    {
+        aprobarSolicitudModal.Show(idSolicitud);
+    }
+
+    private void ShowModalRechazar(int idSolicitud)
+    {
+        rechazarSolicitudModal.Show(idSolicitud);
+    }
+
+    private async Task RecargarSolicitudes()
+    {
+        await CargarSolicitudes();
+        StateHasChanged();
+    }
+
+    public class SolicitudReservacionDTO
+    {
+        public int IdSolicitud { get; set; }
+        public string Motivo { get; set; }
+        public DateTime Fecha { get; set; }
+        public EstadoSolicitudDTO EstadoSolicitud { get; set; }
+    }
+
+    public class EstadoSolicitudDTO
+    {
+        public int IdEstadoSolicitud { get; set; }
+        public string NombreEstadoSolicitud { get; set; }
+    }
+}
