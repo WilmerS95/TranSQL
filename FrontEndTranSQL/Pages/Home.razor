@@ -6,14 +6,7 @@
 
 <h3>Bienvenido a la página principal</h3>
 
-@if (isLoggedIn)
-{
-    <p>Hola, bienvenido al sistema de reservas!</p>
-}
-else
-{
     <Login />
-}
 
 @code {
     private bool isLoggedIn;

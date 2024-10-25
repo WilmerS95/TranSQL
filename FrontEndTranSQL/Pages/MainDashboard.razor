@@ -1,0 +1,56 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using Blazored.LocalStorage
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+@using Microsoft.AspNetCore.Components.Authorization
+
+@page "/main-dashboard"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<h3>Dashboard</h3>
+
+@if (isLogistica)
+{
+<h4>Opciones para el Departamento de Logística:</h4>
+<ul>
+    <li><a @onclick="IrAReservaciones">Gestionar Reservaciones</a></li>
+    <li><a @onclick="IrAAsignaciones">Asignar Vehículos</a></li>
+    <li><a @onclick="IrAInspecciones">Gestionar Inspecciones</a></li>
+    <li><a @onclick="IrAReportes">Generar Reportes</a></li>
+</ul>
+}
+else
+{
+<h4>Opciones para Otros Departamentos:</h4>
+<ul>
+    <li><a @onclick="IrAReservaciones">Solicitar Reservación</a></li>
+    <li><a @onclick="VerEstadoSolicitudes">Ver Estado de tus Solicitudes</a></li>
+</ul>
+}
+
+@code {
+private bool isLogistica;
+
+protected override async Task OnInitializedAsync()
+{
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity != null && user.Identity.IsAuthenticated)
+    {
+        var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
+        isLogistica = departamentoClaim == "Logistica";
+    }
+    else
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}
+
+private void IrAReservaciones() => NavigationManager.NavigateTo("/reservaciones");
+private void IrAAsignaciones() => NavigationManager.NavigateTo("/asignaciones");
+private void IrAInspecciones() => NavigationManager.NavigateTo("/inspecciones");
+private void IrAReportes() => NavigationManager.NavigateTo("/reportes");
+private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
+}
