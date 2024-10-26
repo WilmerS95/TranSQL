@@ -16,6 +16,42 @@ namespace TranSQL.server.Controllers
         {
             _context = context;
         }
+
+        // POST: api/Asignacion
+        [HttpPost]
+        public async Task<IActionResult> AsignarVehiculos(int idSolicitud, List<string> placas)
+        {
+            // Validar si la solicitud existe
+            var solicitud = await _context.SolicitudesReservacion.FindAsync(idSolicitud);
+            if (solicitud == null)
+                return NotFound("La solicitud no existe.");
+
+            foreach (var placa in placas)
+            {
+                var vehiculo = await _context.Vehiculos.FindAsync(placa);
+                if (vehiculo == null || vehiculo.IdEstadoVehiculo != 1) // 1 = Disponible
+                    return BadRequest($"El vehículo {placa} no está disponible.");
+
+                // Cambiar estado del vehículo
+                vehiculo.IdEstadoVehiculo = 2; // 2 = Reservado
+
+                // Crear la asignación
+                var asignacion = new Asignacion
+                {
+                    Placa = placa,
+                    IdSolicitud = idSolicitud,
+                    IdColaborador = solicitud.IdColaborador ?? 0,
+                    IdEstadoSolicitud = solicitud.IdEstadoSolicitud ?? 0
+                };
+
+                _context.Asignaciones.Add(asignacion);
+                _context.Vehiculos.Update(vehiculo);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Vehículos asignados correctamente.");
+        }
+
         //// GET: api/<AsignacionesController>
         //[HttpGet]
         //public async Task<ActionResult<IEnumerable<Asignacion>>> GetAsignaciones()

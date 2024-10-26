@@ -25,6 +25,7 @@
                     <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
                     <td>
                         <button class="btn btn-danger btn-sm" @onclick="() => EliminarSolicitud(solicitud.IdSolicitud)">Eliminar</button>
+
                     </td>
                 </tr>
             }
@@ -81,5 +82,10 @@ else
     {
         public int IdEstadoSolicitud { get; set; }
         public string NombreEstadoSolicitud { get; set; }
+    }
+
+    private void NavegarAsignarVehiculo(int idSolicitud)
+    {
+        NavigationManager.NavigateTo($"/asignar-vehiculos/{idSolicitud}");
     }
 }

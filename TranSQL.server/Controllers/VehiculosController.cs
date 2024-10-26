@@ -44,6 +44,15 @@ namespace TranSQL.server.Controllers
             return Ok(vehiculosDto);
         }
 
+        [HttpGet("disponibles")]
+        public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculosDisponibles()
+        {
+            var disponibles = await _context.Vehiculos
+                .Where(v => v.IdEstadoVehiculo == 1) // 1 = Disponible
+                .ToListAsync();
+            return Ok(disponibles);
+        }
+
         // GET api/<VehiculosController>/5
         [HttpGet("{placa}")]
         public async Task<ActionResult<VehiculoDto>> GetVehiculo(string placa)

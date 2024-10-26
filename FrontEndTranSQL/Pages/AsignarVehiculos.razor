@@ -1,0 +1,52 @@
+﻿@page "/asignar-vehiculos/{idSolicitud:int}"
+@inject HttpClient Http
+
+<h3>Asignar Vehículos a la Solicitud @idSolicitud</h3>
+
+<EditForm OnValidSubmit="AsignarVehiculosHandler">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label>Seleccione Vehículos Disponibles:</label>
+    @foreach (var vehiculo in vehiculosDisponibles)
+    {
+        <div>
+            <input type="checkbox" @bind="@vehiculo.Seleccionado" />
+            <label>@vehiculo.Placa</label>
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary mt-3">Asignar Vehículos</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int idSolicitud { get; set; }
+    private List<VehiculoSeleccionado> vehiculosDisponibles = new List<VehiculoSeleccionado>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        vehiculosDisponibles = await Http.GetFromJsonAsync<List<VehiculoSeleccionado>>("api/vehiculos/disponibles");
+    }
+
+    private async Task AsignarVehiculosHandler()
+    {
+        var placasSeleccionadas = vehiculosDisponibles
+            .Where(v => v.Seleccionado)
+            .Select(v => v.Placa)
+            .ToList();
+
+        var response = await Http.PostAsJsonAsync($"api/asignacion/{idSolicitud}", placasSeleccionadas);
+
+        if (response.IsSuccessStatusCode)
+            Console.WriteLine("Asignación realizada correctamente.");
+        else
+            Console.WriteLine("Error en la asignación.");
+    }
+
+    public class VehiculoSeleccionado
+    {
+        public string Placa { get; set; }
+        public bool Seleccionado { get; set; }
+    }
+}
