@@ -1,5 +1,4 @@
 ﻿@inject HttpClient Http
-@inject NavigationManager NavigationManager
 
 <Dialog IsVisible="IsModalVisible" OnClose="CloseModal">
     <DialogTitle>Rechazar Solicitud</DialogTitle>
@@ -45,7 +44,7 @@
         if (!string.IsNullOrEmpty(MotivoRechazo))
         {
             var data = new { IdSolicitud = SolicitudId, MotivoRechazo = MotivoRechazo };
-            var response = await Http.PostAsJsonAsync("api/solicitudesreservacion/rechazar", data);
+            var response = await Http.PostAsJsonAsync($"api/solicitudesreservacion/rechazar/{SolicitudId}", data);
 
             if (response.IsSuccessStatusCode)
             {

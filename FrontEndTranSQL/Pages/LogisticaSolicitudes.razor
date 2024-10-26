@@ -1,49 +1,57 @@
 ﻿@page "/logistica-solicitudes"
+@using CurrieTechnologies.Razor.SweetAlert2
+@using TranSQL.shared.DTO
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject SweetAlertService Swal
 
-<h3>Gestión de Solicitudes - Logística</h3>
+<h3 class="text-center mt-4 mb-4">Gestión de Solicitudes - Logística</h3>
 
 @if (solicitudes != null && solicitudes.Any())
 {
-    <table class="table table-hover table-striped">
-        <thead>
-            <tr>
-                <th>Motivo</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var solicitud in solicitudes)
-            {
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered table-striped align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td>@solicitud.Motivo</td>
-                    <td>@solicitud.Fecha.ToShortDateString()</td>
-                    <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
-                    <td>
-                        <button class="btn btn-success btn-sm me-2" @onclick="() => ShowModalAceptar(solicitud.IdSolicitud)">Aceptar</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => ShowModalRechazar(solicitud.IdSolicitud)">Rechazar</button>
-                    </td>
+                    <th>Motivo de Solicitud</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Motivo de Acción</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var solicitud in solicitudes)
+                {
+                    <tr>
+                        <td>@solicitud.Motivo</td>
+                        <td>@solicitud.Fecha.ToShortDateString()</td>
+                        <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
+                        <td>
+                            <input type="text" class="form-control" @bind="@solicitud.MotivoAccion" placeholder="Escribe el motivo" />
+                            @if (isRechazarIntentado && string.IsNullOrEmpty(solicitud.MotivoAccion))
+                            {
+                                <p class="text-danger mt-1">El motivo de rechazo es obligatorio.</p>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm me-2" @onclick="() => ConfirmarAceptar(solicitud)">Aceptar</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => ConfirmarRechazar(solicitud)">Rechazar</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 else
 {
-    <p>No hay solicitudes pendientes.</p>
+    <p class="text-center">No hay solicitudes pendientes.</p>
 }
 
-<!-- Referencias a los componentes modales -->
-<AceptarSolicitudModal @ref="aprobarSolicitudModal" OnAprobado="RecargarSolicitudes" />
-<RechazarSolicitudModal @ref="rechazarSolicitudModal" OnRechazado="RecargarSolicitudes" />
-
 @code {
-    private List<SolicitudReservacionDTO> solicitudes = new();
-    private AceptarSolicitudModal aprobarSolicitudModal;
-    private RechazarSolicitudModal rechazarSolicitudModal;
+    private List<SolicitudReservacionLogisticaDTO> solicitudes = new();
+    private bool isRechazarIntentado = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,36 +60,81 @@ else
 
     private async Task CargarSolicitudes()
     {
-        solicitudes = await Http.GetFromJsonAsync<List<SolicitudReservacionDTO>>("api/solicitudesreservacion/pendientes");
+        solicitudes = await Http.GetFromJsonAsync<List<SolicitudReservacionLogisticaDTO>>("api/solicitudesreservacion/pendientes");
     }
 
-    private void ShowModalAceptar(int idSolicitud)
+    private async Task ConfirmarAceptar(SolicitudReservacionLogisticaDTO solicitud)
     {
-        aprobarSolicitudModal.Show(idSolicitud);
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "¿Deseas aprobar esta solicitud?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí, aprobar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (!result.IsConfirmed) return;
+
+        await AceptarSolicitud(solicitud);
     }
 
-    private void ShowModalRechazar(int idSolicitud)
+    private async Task ConfirmarRechazar(SolicitudReservacionLogisticaDTO solicitud)
     {
-        rechazarSolicitudModal.Show(idSolicitud);
+        isRechazarIntentado = true;
+
+        if (string.IsNullOrEmpty(solicitud.MotivoAccion))
+        {
+            await Swal.FireAsync("Error", "El motivo de rechazo es obligatorio.", SweetAlertIcon.Error);
+            return;
+        }
+
+        var result = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "¿Estás seguro?",
+                Text = "¿Deseas rechazar esta solicitud?",
+                Icon = SweetAlertIcon.Warning,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Sí, rechazar",
+                CancelButtonText = "Cancelar"
+            });
+
+        if (!result.IsConfirmed) return;
+
+        await RechazarSolicitud(solicitud);
     }
 
-    private async Task RecargarSolicitudes()
+    private async Task AceptarSolicitud(SolicitudReservacionLogisticaDTO solicitud)
     {
-        await CargarSolicitudes();
-        StateHasChanged();
+        var data = new { IdSolicitud = solicitud.IdSolicitud, MotivoAprobacion = solicitud.MotivoAccion };
+        var response = await Http.PostAsJsonAsync($"api/solicitudesreservacion/aceptar/{solicitud.IdSolicitud}", data);
+
+        if (response.IsSuccessStatusCode)
+        {
+            await Swal.FireAsync("Aprobado", "La solicitud ha sido aprobada con éxito.", SweetAlertIcon.Success);
+            await CargarSolicitudes();
+        }
+        else
+        {
+            await Swal.FireAsync("Error", "Hubo un problema al aprobar la solicitud.", SweetAlertIcon.Error);
+        }
     }
 
-    public class SolicitudReservacionDTO
+    private async Task RechazarSolicitud(SolicitudReservacionLogisticaDTO solicitud)
     {
-        public int IdSolicitud { get; set; }
-        public string Motivo { get; set; }
-        public DateTime Fecha { get; set; }
-        public EstadoSolicitudDTO EstadoSolicitud { get; set; }
-    }
+        var data = new { IdSolicitud = solicitud.IdSolicitud, MotivoRechazo = solicitud.MotivoAccion };
+        var response = await Http.PostAsJsonAsync($"api/solicitudesreservacion/rechazar/{solicitud.IdSolicitud}", data);
 
-    public class EstadoSolicitudDTO
-    {
-        public int IdEstadoSolicitud { get; set; }
-        public string NombreEstadoSolicitud { get; set; }
+        if (response.IsSuccessStatusCode)
+        {
+            isRechazarIntentado = false;
+            await Swal.FireAsync("Rechazada", "La solicitud ha sido rechazada con éxito.", SweetAlertIcon.Success);
+            await CargarSolicitudes();
+        }
+        else
+        {
+            await Swal.FireAsync("Error", "Hubo un problema al rechazar la solicitud.", SweetAlertIcon.Error);
+        }
     }
 }

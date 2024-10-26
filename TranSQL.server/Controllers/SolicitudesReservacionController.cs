@@ -78,36 +78,36 @@ namespace TranSQL.server.Controllers
             return Ok(solicitudesPendientes);
         }
 
-        [HttpPost("aceptar/{id}")]
-        public async Task<IActionResult> AceptarSolicitud(int id, [FromBody] AprobacionSolicitudDTO aprobacionDto)
+        [HttpPut("aprobar/{id}")]
+        public async Task<IActionResult> AprobarSolicitud(int id, [FromBody] AprobacionSolicitudDTO aprobacionDto)
         {
             var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
-            if (solicitud == null)
-                return NotFound();
+            if (solicitud == null) return NotFound();
 
-            solicitud.IdEstadoSolicitud = 1;
+            // Actualiza el estado y el motivo de aprobación
+            solicitud.IdEstadoSolicitud = 1; // Asume que 1 es el estado "Aprobado"
             solicitud.Motivo = aprobacionDto.MotivoAprobacion;
-            await _context.SaveChangesAsync();
+            _context.SolicitudesReservacion.Update(solicitud);
 
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        [HttpPost("rechazar/{id}")]
+        [HttpPut("rechazar/{id}")]
         public async Task<IActionResult> RechazarSolicitud(int id, [FromBody] RechazoSolicitudDTO rechazoDto)
         {
-            if (string.IsNullOrWhiteSpace(rechazoDto.MotivoRechazo))
-            {
-                return BadRequest("El motivo de rechazo es obligatorio.");
-            }
-
             var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
-            if (solicitud == null)
-                return NotFound();
+            if (solicitud == null) return NotFound();
 
-            solicitud.IdEstadoSolicitud = 2;
+            if (string.IsNullOrWhiteSpace(rechazoDto.MotivoRechazo))
+                return BadRequest("El motivo de rechazo es obligatorio.");
+
+            // Actualiza el estado y el motivo de rechazo
+            solicitud.IdEstadoSolicitud = 2; // Asume que 2 es el estado "Rechazado"
             solicitud.Motivo = rechazoDto.MotivoRechazo;
-            await _context.SaveChangesAsync();
+            _context.SolicitudesReservacion.Update(solicitud);
 
+            await _context.SaveChangesAsync();
             return NoContent();
         }
 

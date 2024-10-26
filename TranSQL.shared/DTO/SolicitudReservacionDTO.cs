@@ -14,6 +14,7 @@ namespace TranSQL.shared.DTO
 
         //public int IdSolicitud { get; set; }
         //public ColaboradorDTO Colaborador { get; set; }
+        //public int? IdColaborador { get; set; }
         //public EstadoSolicitudDTO EstadoSolicitud { get; set; }
     }
 }

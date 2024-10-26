@@ -1,5 +1,4 @@
 ﻿@inject HttpClient Http
-@inject NavigationManager NavigationManager
 
 <Dialog IsVisible="IsModalVisible" OnClose="CloseModal">
     <DialogTitle>Aprobar Solicitud</DialogTitle>
@@ -34,7 +33,7 @@
     private async Task ConfirmarAprobacion()
     {
         var data = new { IdSolicitud = SolicitudId, MotivoAprobacion = MotivoAprobacion };
-        var response = await Http.PostAsJsonAsync("api/solicitudesreservacion/aprobar", data);
+        var response = await Http.PostAsJsonAsync($"api/solicitudesreservacion/aceptar/{SolicitudId}", data);
         
         if (response.IsSuccessStatusCode)
         {
