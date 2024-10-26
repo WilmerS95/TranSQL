@@ -1,0 +1,100 @@
+﻿@using CurrieTechnologies.Razor.SweetAlert2
+@using Blazored.LocalStorage
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+@using Microsoft.AspNetCore.Components.Authorization
+
+@page "/main-dashboard"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="text-center mb-4">
+                <h2 class="text-uppercase font-weight-bold display-6">Dashboard</h2>
+                <p class="text-muted">Bienvenido al panel de control</p>
+            </div>
+
+            @if (isLogistica)
+            {
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Opciones para Logística</h4>
+                        <i class="bi bi-truck" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item dashboard-item" @onclick="VerEstadoSolicitudes">
+                                <i class="bi bi-list-check me-2"></i> Ver mis solicitudes
+                            </li>
+                            <li class="list-group-item dashboard-item" @onclick="IrAGestionSolicitudes">
+                                <i class="bi bi-gear-fill me-2"></i> Gestionar Solicitudes
+                            </li>
+                            <li class="list-group-item dashboard-item" @onclick="IrAAsignaciones">
+                                <i class="bi bi-people-fill me-2"></i> Asignar Vehículos
+                            </li>
+                            <li class="list-group-item dashboard-item" @onclick="IrAInspecciones">
+                                <i class="bi bi-search me-2"></i> Gestionar Inspecciones
+                            </li>
+                            <li class="list-group-item dashboard-item" @onclick="IrAReportes">
+                                <i class="bi bi-graph-up-arrow me-2"></i> Generar Reportes
+                            </li>                            
+                        </ul>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Opciones para Otros Departamentos</h4>
+                        <i class="bi bi-clipboard-check" style="font-size: 1.5rem;"></i>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item dashboard-item" @onclick="VerEstadoSolicitudes">
+                                <i class="bi bi-list-check me-2"></i> Ver mis solicitudes
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isLogistica;
+    private int idColaborador;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
+            isLogistica = departamentoClaim == "Logística";
+            var idColaboradorClaim = user.Claims.FirstOrDefault(c => c.Type == "IdColaborador")?.Value;
+            if (int.TryParse(idColaboradorClaim, out var id))
+            {
+                idColaborador = id;
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+    private void IrAReservaciones() => NavigationManager.NavigateTo("/reservaciones");
+    private void IrAAsignaciones() => NavigationManager.NavigateTo("/asignaciones");
+    private void IrAInspecciones() => NavigationManager.NavigateTo("/inspecciones");
+    private void IrAReportes() => NavigationManager.NavigateTo("/reportes");
+    private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
+    private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
+    private void IrASolicitudes() => NavigationManager.NavigateTo($"/solicitudes?idColaborador={idColaborador}");
+    private void IrAGestionSolicitudes() => NavigationManager.NavigateTo($"/logistica-solicitudes");
+}

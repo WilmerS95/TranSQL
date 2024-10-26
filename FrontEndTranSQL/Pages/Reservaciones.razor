@@ -1,0 +1,154 @@
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+
+@page "/reservaciones"
+@inject ReservacionService reservacionService
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>Gestión de Reservaciones
+                    </h3>
+                    <button class="btn btn-outline-light" @onclick="MostrarModalNuevaReservacion">
+                        <i class="bi bi-plus-circle me-1"></i> Nueva Reservación
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover table-striped table-bordered align-middle text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Vehículo</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (reservaciones == null)
+                            {
+                                <tr>
+                                    <td colspan="5">Cargando reservaciones...</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var reservacion in reservaciones)
+                                {
+                                    <tr>
+                                        <td>@reservacion.IdReservacion</td>
+                                        <td>@reservacion.Placa</td>
+                                        <td>@reservacion.FechaInicio.ToString("yyyy-MM-dd")</td>
+                                        <td>@reservacion.FechaFin.ToString("yyyy-MM-dd")</td>
+                                        <td>
+                                            <button class="btn btn-outline-danger btn-sm" @onclick="() => EliminarReservacion(reservacion.IdReservacion)">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nueva reservación -->
+@if (mostrarModal)
+{
+    <div class="modal" style="display: block; background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Reservación</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@nuevaReservacion" OnValidSubmit="@GuardarNuevaReservacion">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="form-group">
+                            <label>Placa del Vehículo</label>
+                            <InputText class="form-control" @bind-Value="nuevaReservacion.Placa" />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Inicio</label>
+                            <InputDate class="form-control" @bind-Value="nuevaReservacion.FechaInicio" />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Fin</label>
+                            <InputDate class="form-control" @bind-Value="nuevaReservacion.FechaFin" />
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <InputTextArea class="form-control" @bind-Value="nuevaReservacion.Observaciones" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ReservacionDTO> reservaciones;
+    private ReservacionDTO nuevaReservacion = new ReservacionDTO();
+    private bool mostrarModal = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarReservaciones();
+    }
+
+    private async Task CargarReservaciones()
+    {
+        reservaciones = await reservacionService.GetReservacionesAsync();
+    }
+
+    private void MostrarModalNuevaReservacion()
+    {
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+        nuevaReservacion = new ReservacionDTO(); // Limpiar el formulario
+    }
+
+    private async Task GuardarNuevaReservacion()
+    {
+        var response = await reservacionService.CrearReservacionAsync(nuevaReservacion);
+        if (response.IsSuccessStatusCode)
+        {
+            await CargarReservaciones();
+            CerrarModal();
+        }
+        else
+        {
+            // Manejar el error
+        }
+    }
+
+    private async Task EliminarReservacion(int idReservacion)
+    {
+        var response = await reservacionService.EliminarReservacionAsync(idReservacion);
+        if (response.IsSuccessStatusCode)
+        {
+            await CargarReservaciones();
+        }
+        else
+        {
+            // Manejar el error
+        }
+    }
+}

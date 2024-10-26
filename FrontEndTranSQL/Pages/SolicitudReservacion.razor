@@ -1,0 +1,86 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using TranSQL.shared.DTO
+@using System.Security.Claims
+@page "/solicitud-reservacion"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-black text-white text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-clipboard-plus me-2"></i> Solicitar Reservación
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <EditForm Model="nuevaSolicitud" OnValidSubmit="EnviarSolicitud">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="form-group mb-3">
+                            <label for="motivo" class="form-label">Motivo</label>
+                            <InputTextArea id="motivo" class="form-control" @bind-Value="nuevaSolicitud.Motivo" placeholder="Describe el motivo de la reservación" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="fecha" class="form-label">Fecha</label>
+                            <InputDate id="fecha" class="form-control" @bind-Value="nuevaSolicitud.Fecha" />
+                        </div>
+
+                        <div class="d-grid">
+
+                            <button type="submit" class="btn btn-outline-dark" >
+                                
+                                <i class="bi bi-send-fill me-1"></i> Enviar Solicitud
+                      
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="card-footer text-muted text-center">
+                    <small>&copy; 2024 - TRANSQL System</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private SolicitudReservacionDTO nuevaSolicitud = new SolicitudReservacionDTO();
+
+    private async Task EnviarSolicitud()
+    {
+        // Obtener el estado de autenticación actual
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Obtener el IdColaborador del claim si el usuario está autenticado
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            var idColaboradorClaim = user.FindFirst("IdColaborador")?.Value;
+            if (int.TryParse(idColaboradorClaim, out var idColaborador))
+            {
+                nuevaSolicitud.IdColaborador = idColaborador;
+            }
+            else
+            {
+                Console.WriteLine("Error: IdColaborador no está presente en el token o no es válido.");
+                return;
+            }
+        }
+
+        // Enviar la solicitud de reservación
+        var response = await Http.PostAsJsonAsync("api/solicitudesreservacion", nuevaSolicitud);
+        if (response.IsSuccessStatusCode)
+        {
+            // Redirigir después de enviar la solicitud--
+            NavigationManager.NavigateTo("/solicitudes");
+        }
+        else
+        {
+            Console.WriteLine("Error al enviar la solicitud.");
+        }
+    }
+}

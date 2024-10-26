@@ -1,0 +1,23 @@
+﻿@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<Vehiculo> OnSave { get; set; }
+
+    private Vehiculo newVehiculo = new();
+
+    // Método para guardar el nuevo vehículo
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(newVehiculo);
+        newVehiculo = new Vehiculo(); // Reiniciar el vehículo
+    }
+}
+
+<div class="modal" style="@(Visible ? "display:block;" : "display:none;")">
+    <div class="modal-content">
+        <span class="close" @onclick="() => Visible = false">&times;</span>
+        <h2>Agregar Vehículo</h2>
+        <input @bind="newVehiculo.Placa" placeholder="Placa" />
+        <input @bind="newVehiculo.TipoVehiculo" placeholder="Tipo de Vehículo" />
+        <button @onclick="Save">Guardar</button>
+    </div>
+</div>

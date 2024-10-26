@@ -1,0 +1,19 @@
+﻿@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<TipoVehiculo> OnSave { get; set; }
+
+    private TipoVehiculo newTipoVehiculo = new();
+
+    // Método para guardar el nuevo tipo de vehículo
+    private async Task Save()
+    {
+        await OnSave.InvokeAsync(newTipoVehiculo);
+        newTipoVehiculo = new TipoVehiculo(); // Reiniciar el tipo de vehículo
+    }
+}
+
+<div class="modal" style="@(Visible ? "display:block;" : "display:none;")">
+    <div class="modal-content">
+        <span class="close" @onclick="() => Visible = false">&times;</span>
+        <h2>Agregar Tipo de Vehículo</h2>
+        <input @bind="newTipoVehiculo.Nombre" placeholder="

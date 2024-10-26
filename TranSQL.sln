@@ -5,9 +5,9 @@ VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranSQL.client", "FrontEndTranSQL\TranSQL.client.csproj", "{1BD7FDB5-7B9D-4A9D-9CEE-FE56BD7E75B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranSQL.server", "TranSQL.server\TranSQL.server.csproj", "{5A765866-F613-41E8-A3D5-6E6BE6879642}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranSQL.server", "TranSQL.server\TranSQL.server.csproj", "{5A765866-F613-41E8-A3D5-6E6BE6879642}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TranSQL.shared", "TranSQL.shared\TranSQL.shared.csproj", "{31EAB505-6177-4570-903D-1F9472567920}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TranSQL.shared", "TranSQL.shared\TranSQL.shared.csproj", "{31EAB505-6177-4570-903D-1F9472567920}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

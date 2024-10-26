@@ -1,0 +1,43 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@page "/estado-solicitudes"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">
+                        <i class="bi bi-file-earmark-check me-2"></i> Mis Solicitudes de Reservación
+                    </h3>
+                    <button class="btn btn-outline-light" @onclick="IrASolicitudReservacion">
+                        <i class="bi bi-plus-circle me-1"></i> Nueva Solicitud
+                    </button>
+                </div>
+                <Solicitudes/>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void CrearNuevaSolicitud()
+    {
+        // Lógica para crear una nueva solicitud
+    }
+
+    private void VerDetalles()
+    {
+        // Lógica para ver los detalles de una solicitud
+    }
+
+    private void CancelarSolicitud()
+    {
+        // Lógica para cancelar una solicitud
+    }
+
+    private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
+}

@@ -1,0 +1,48 @@
+﻿@inject HttpClient Http
+
+<Dialog IsVisible="IsModalVisible" OnClose="CloseModal">
+    <DialogTitle>Aprobar Solicitud</DialogTitle>
+    <DialogContent>
+        <label for="motivoAprobacion">Motivo de Aprobación (Opcional):</label>
+        <InputTextArea id="motivoAprobacion" class="form-control" @bind-Value="MotivoAprobacion" />
+    </DialogContent>
+    <DialogActions>
+        <button class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+        <button class="btn btn-primary" @onclick="ConfirmarAprobacion">Aceptar</button>
+    </DialogActions>
+</Dialog>
+
+@code {
+    [Parameter] public int SolicitudId { get; set; }
+    [Parameter] public EventCallback OnAprobado { get; set; }
+
+    public bool IsModalVisible { get; set; } = false;
+    public string MotivoAprobacion { get; set; } = string.Empty;
+
+    public void Show(int solicitudId)
+    {
+        SolicitudId = solicitudId;
+        IsModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        IsModalVisible = false;
+    }
+
+    private async Task ConfirmarAprobacion()
+    {
+        var data = new { IdSolicitud = SolicitudId, MotivoAprobacion = MotivoAprobacion };
+        var response = await Http.PostAsJsonAsync($"api/solicitudesreservacion/aceptar/{SolicitudId}", data);
+        
+        if (response.IsSuccessStatusCode)
+        {
+            await OnAprobado.InvokeAsync();
+            CloseModal();
+        }
+        else
+        {
+            Console.WriteLine("Error al aprobar la solicitud.");
+        }
+    }
+}
