@@ -75,7 +75,7 @@
         var response = await Http.PostAsJsonAsync("api/solicitudesreservacion", nuevaSolicitud);
         if (response.IsSuccessStatusCode)
         {
-            // Redirigir después de enviar la solicitud
+            // Redirigir después de enviar la solicitud--
             NavigationManager.NavigateTo("/solicitudes");
         }
         else
