@@ -80,6 +80,16 @@ namespace TranSQL.server
                 .HasForeignKey(s => s.IdEstadoSolicitud)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Asignacion>()
+                .HasOne(a => a.Vehiculo)
+                .WithMany(v => v.Asignaciones)
+                .HasForeignKey(a => a.Placa);
+
+            modelBuilder.Entity<Asignacion>()
+                .HasOne(a => a.SolicitudReservacion)
+                .WithMany(s => s.Asignaciones)
+                .HasForeignKey(a => a.IdSolicitud);
+
             // Llama a la configuración base
             base.OnModelCreating(modelBuilder);
         }

@@ -16,64 +16,64 @@ namespace TranSQL.server.Controllers
         {
             _context = context;
         }
-        // GET: api/<AsignacionesController>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Asignacion>>> GetAsignaciones()
-        {
-            return await _context.Asignaciones.ToListAsync();
-        }
+        //// GET: api/<AsignacionesController>
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Asignacion>>> GetAsignaciones()
+        //{
+        //    return await _context.Asignaciones.ToListAsync();
+        //}
 
-        // GET api/<AsignacionesController>/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Asignacion>> GetAsignacion(int id)
-        {
-            var asignacion = await _context.Asignaciones.FindAsync(id);
-            if (asignacion == null)
-            {
-                return NotFound();
-            }
+        //// GET api/<AsignacionesController>/5
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Asignacion>> GetAsignacion(int id)
+        //{
+        //    var asignacion = await _context.Asignaciones.FindAsync(id);
+        //    if (asignacion == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            //return Ok(asignacion);
-            return asignacion;
-        }
+        //    //return Ok(asignacion);
+        //    return asignacion;
+        //}
 
-        // POST api/<AsignacionesController>
-        [HttpPost]
-        public async Task<ActionResult<Asignacion>> PostAsignacion(Asignacion asignacion)
-        {
-            _context.Asignaciones.Add(asignacion);
-            await _context.SaveChangesAsync();
+        //// POST api/<AsignacionesController>
+        //[HttpPost]
+        //public async Task<ActionResult<Asignacion>> PostAsignacion(Asignacion asignacion)
+        //{
+        //    _context.Asignaciones.Add(asignacion);
+        //    await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAsignacion", new { id = asignacion.idAsignacion }, asignacion);
+        //    return CreatedAtAction("GetAsignacion", new { id = asignacion.idAsignacion }, asignacion);
 
-        }
+        //}
 
-        // PUT api/<AsignacionesController>/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAsignacion(int id, Asignacion asignacion)
-        {
-            if (id != asignacion.idAsignacion)
-            {
-                return BadRequest();
-            }
-            _context.Entry(asignacion).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+        //// PUT api/<AsignacionesController>/5
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutAsignacion(int id, Asignacion asignacion)
+        //{
+        //    if (id != asignacion.idAsignacion)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    _context.Entry(asignacion).State = EntityState.Modified;
+        //    await _context.SaveChangesAsync();
+        //    return NoContent();
+        //}
 
-        // DELETE api/<AsignacionesController>/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsignacion(int id)
-        {
-            var asignacion = await _context.Asignaciones.FindAsync(id);
-            if (asignacion == null)
-            {
-                return NotFound();
-            }
-            _context.Asignaciones.Remove(asignacion);
-            await _context.SaveChangesAsync();
+        //// DELETE api/<AsignacionesController>/5
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteAsignacion(int id)
+        //{
+        //    var asignacion = await _context.Asignaciones.FindAsync(id);
+        //    if (asignacion == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    _context.Asignaciones.Remove(asignacion);
+        //    await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
     }
 }

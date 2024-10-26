@@ -127,6 +127,7 @@ namespace TranSQL.server.Controllers
         {
             var solicitudes = await _context.SolicitudesReservacion
                 .Include(s => s.Colaborador)
+                .ThenInclude(c => c.Departamento)
                 .Include(s => s.EstadoSolicitud)
                 .Select(s => new SolicitudReservacionReporteDTO
                 {
