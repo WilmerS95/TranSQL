@@ -19,7 +19,7 @@
             @if (isLogistica)
             {
                 <div class="card shadow-lg mb-4">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Opciones para Logística</h4>
                         <i class="bi bi-truck" style="font-size: 1.5rem;"></i>
                     </div>
@@ -45,6 +45,11 @@
                                 <span>Generar Reportes</span>
                                 <button class="btn btn-outline-primary btn-sm" @onclick="IrAReportes">Ir</button>
                             </li>
+
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>Solicitudes pendientes</span>
+                                <button class="btn btn-outline-primary btn-sm" @onclick="IrAGestionSolicitudes">Ir</button>
+                            </li>
                             
                         </ul>
                     </div>
@@ -53,7 +58,7 @@
             else
             {
                 <div class="card shadow-lg mb-4">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">Opciones para Otros Departamentos</h4>
                         <i class="bi bi-clipboard-check" style="font-size: 1.5rem;"></i>
                     </div>
@@ -91,7 +96,7 @@
         if (user.Identity != null && user.Identity.IsAuthenticated)
         {
             var departamentoClaim = user.Claims.FirstOrDefault(c => c.Type == "Departamento")?.Value;
-            isLogistica = departamentoClaim == "Logistica";
+            isLogistica = departamentoClaim == "Logística";
             var idColaboradorClaim = user.Claims.FirstOrDefault(c => c.Type == "IdColaborador")?.Value;
             if (int.TryParse(idColaboradorClaim, out var id))
             {
@@ -111,4 +116,5 @@
     private void VerEstadoSolicitudes() => NavigationManager.NavigateTo("/estado-solicitudes");
     private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
     private void IrASolicitudes() => NavigationManager.NavigateTo($"/solicitudes?idColaborador={idColaborador}");
+    private void IrAGestionSolicitudes() => NavigationManager.NavigateTo($"/logistica-solicitudes");
 }

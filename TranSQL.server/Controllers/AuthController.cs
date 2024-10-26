@@ -60,7 +60,7 @@ namespace TranSQL.server.Controllers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Correo),
-                new Claim("Departamento", user.Departamento),  // Rol basado en departamento
+                new Claim("Departamento", user.Departamento),
                 new Claim("IdColaborador", user.IdColaborador.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

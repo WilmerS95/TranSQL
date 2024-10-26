@@ -1,0 +1,17 @@
+﻿@using TranSQL.client.Services
+
+@page "/logout"
+@inject TokenAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<button class="btn btn-danger" @onclick="HandleLogout">
+    Cerrar Sesión
+</button>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await AuthStateProvider.LogoutAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+}
