@@ -80,16 +80,27 @@ namespace TranSQL.server.Controllers
         }
 
         [HttpPut("aprobar/{id}")]
-        public async Task<IActionResult> AprobarSolicitud(int id, [FromBody] AprobacionSolicitudDTO aprobacionDto)
+        public async Task<IActionResult> AprobarSolicitud(int id, [FromBody] RechazoSolicitudDTO aprobacionDto)
         {
-            var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
-            if (solicitud == null) return NotFound();
+            try
+            {
+                var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
+                if (solicitud == null) return NotFound();
 
-            solicitud.IdEstadoSolicitud = 1;
-            solicitud.Motivo = aprobacionDto.MotivoAprobacion;
-            _context.SolicitudesReservacion.Update(solicitud);
-            await _context.SaveChangesAsync();
-            return NoContent();
+                solicitud.IdEstadoSolicitud = 1; // Aprobado
+                //solicitud.JustificacionRechazo = aprobacionDto.MotivoAprobacion;
+
+                _context.SolicitudesReservacion.Update(solicitud);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                // Registra el error para depuración
+                Console.WriteLine($"Error al aprobar solicitud: {ex.Message}");
+                return StatusCode(500, "Error interno al procesar la solicitud.");
+            }
         }
 
         [HttpPut("rechazar/{id}")]
@@ -108,6 +119,30 @@ namespace TranSQL.server.Controllers
             _context.SolicitudesReservacion.Update(solicitud);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        // Método en el controlador del servidor para devolver el reporte
+        [HttpGet("todas")]
+        public async Task<ActionResult<IEnumerable<SolicitudReservacionReporteDTO>>> GetReporteSolicitudes()
+        {
+            var solicitudes = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador)
+                .Include(s => s.EstadoSolicitud)
+                .Select(s => new SolicitudReservacionReporteDTO
+                {
+                    IdSolicitud = s.IdSolicitud,
+                    Motivo = s.Motivo,
+                    Fecha = s.Fecha,
+                    IdEstadoSolicitud = s.IdEstadoSolicitud ?? 0,
+                    NombreEstadoSolicitud = s.EstadoSolicitud != null ? s.EstadoSolicitud.NombreEstadoSolicitud : "Desconocido",
+                    ColaboradorNombreCompleto = s.Colaborador != null
+                        ? $"{s.Colaborador.PrimerNombre} {s.Colaborador.PrimerApellido}"
+                        : "No asignado",
+                    JustificacionRechazo = s.JustificacionRechazo ?? "No aplica"
+                })
+                .ToListAsync();
+
+            return Ok(solicitudes);
         }
 
         // POST api/<SolicitudesReservacionController>
