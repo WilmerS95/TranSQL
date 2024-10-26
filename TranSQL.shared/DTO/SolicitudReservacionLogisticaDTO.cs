@@ -15,5 +15,6 @@ namespace TranSQL.shared.DTO
         public EstadoSolicitudDTO EstadoSolicitud { get; set; }
         public ColaboradorDTO Colaborador { get; set; }
         public string MotivoAccion { get; set; }
+        public bool IsRechazarIntentado { get; set; } = false;
     }
 }
