@@ -71,6 +71,7 @@ namespace TranSQL.server.Controllers
         {
             var solicitudesPendientes = await _context.SolicitudesReservacion
                 .Include(s => s.Colaborador)
+                .ThenInclude(c => c.Departamento)  // Incluye Departamento
                 .Include(s => s.EstadoSolicitud)
                 .Where(s => s.IdEstadoSolicitud == 3)
                 .ToListAsync();
@@ -84,11 +85,9 @@ namespace TranSQL.server.Controllers
             var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
             if (solicitud == null) return NotFound();
 
-            // Actualiza el estado y el motivo de aprobación
-            solicitud.IdEstadoSolicitud = 1; // Asume que 1 es el estado "Aprobado"
+            solicitud.IdEstadoSolicitud = 1;
             solicitud.Motivo = aprobacionDto.MotivoAprobacion;
             _context.SolicitudesReservacion.Update(solicitud);
-
             await _context.SaveChangesAsync();
             return NoContent();
         }
@@ -102,11 +101,11 @@ namespace TranSQL.server.Controllers
             if (string.IsNullOrWhiteSpace(rechazoDto.MotivoRechazo))
                 return BadRequest("El motivo de rechazo es obligatorio.");
 
-            // Actualiza el estado y el motivo de rechazo
-            solicitud.IdEstadoSolicitud = 2; // Asume que 2 es el estado "Rechazado"
-            solicitud.Motivo = rechazoDto.MotivoRechazo;
-            _context.SolicitudesReservacion.Update(solicitud);
+            // Asigna el motivo de rechazo a la propiedad JustificacionRechazo
+            solicitud.IdEstadoSolicitud = 2; // Estado Rechazado
+            solicitud.JustificacionRechazo = rechazoDto.MotivoRechazo;
 
+            _context.SolicitudesReservacion.Update(solicitud);
             await _context.SaveChangesAsync();
             return NoContent();
         }

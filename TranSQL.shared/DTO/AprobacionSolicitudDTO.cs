@@ -8,6 +8,6 @@ namespace TranSQL.shared.DTO
 {
     public class AprobacionSolicitudDTO
     {
-        public string? MotivoAprobacion { get; set; }
+        public string MotivoAprobacion { get; set; } = string.Empty;
     }
 }

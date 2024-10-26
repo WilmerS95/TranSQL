@@ -12,6 +12,6 @@ namespace TranSQL.shared.DTO
         public string PrimerNombre { get; set; }
         public string PrimerApellido { get; set; }
         public string Correo { get; set; }
-        public string Departamento { get; set; }
+        public DepartamentoDTO Departamento { get; set; }
     }
 }
