@@ -1,9 +1,11 @@
-﻿@page "/asignar-vehiculos/{idSolicitud:int}"
+﻿@using TranSQL.shared.models
+@page "/asignar-vehiculos/{idSolicitud:int}"
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <h3>Asignar Vehículos a la Solicitud @idSolicitud</h3>
 
-<EditForm OnValidSubmit="AsignarVehiculosHandler">
+<EditForm Model="@asignacionModel" OnValidSubmit="ProcesarAsignacion">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -16,7 +18,7 @@
         </div>
     }
 
-    <button type="submit" class="btn btn-primary mt-3">Asignar Vehículos</button>
+    <button type="submit">Asignar Vehículos</button>
 </EditForm>
 
 @code {
@@ -24,24 +26,30 @@
     public int idSolicitud { get; set; }
     private List<VehiculoSeleccionado> vehiculosDisponibles = new List<VehiculoSeleccionado>();
 
+    private object asignacionModel = new();
+
     protected override async Task OnInitializedAsync()
     {
         vehiculosDisponibles = await Http.GetFromJsonAsync<List<VehiculoSeleccionado>>("api/vehiculos/disponibles");
     }
 
-    private async Task AsignarVehiculosHandler()
+    private async Task ProcesarAsignacion()
     {
         var placasSeleccionadas = vehiculosDisponibles
             .Where(v => v.Seleccionado)
             .Select(v => v.Placa)
             .ToList();
 
-        var response = await Http.PostAsJsonAsync($"api/asignacion/{idSolicitud}", placasSeleccionadas);
+        var response = await Http.PutAsJsonAsync($"api/vehiculos/asignar-vehiculos/{idSolicitud}", placasSeleccionadas);
 
         if (response.IsSuccessStatusCode)
-            Console.WriteLine("Asignación realizada correctamente.");
+        {
+            NavigationManager.NavigateTo("/logistica-solicitudes");
+        }
         else
+        {
             Console.WriteLine("Error en la asignación.");
+        }
     }
 
     public class VehiculoSeleccionado
@@ -50,3 +58,4 @@
         public bool Seleccionado { get; set; }
     }
 }
+

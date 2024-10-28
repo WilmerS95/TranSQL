@@ -3,6 +3,7 @@
 @using TranSQL.shared.DTO
 @inject HttpClient Http
 @inject SweetAlertService Swal
+@inject NavigationManager NavigationManager
 
 <h3 class="text-center mt-4 mb-4">Gestión de Solicitudes - Logística</h3>
 
@@ -34,7 +35,7 @@
                             }
                         </td>
                         <td class="text-center">
-                            <button class="btn btn-success btn-sm me-2" @onclick="() => ConfirmarAceptar(solicitud)" >Aceptar</button>
+                            <button class="btn btn-success btn-sm me-2" @onclick="() => ConfirmarAceptar(solicitud)">Aceptar</button>
                             <button class="btn btn-danger btn-sm" @onclick="() => ConfirmarRechazar(solicitud)">Rechazar</button>
                         </td>
                     </tr>
@@ -113,7 +114,7 @@ else
         if (response.IsSuccessStatusCode)
         {
             await Swal.FireAsync("Aprobado", "La solicitud ha sido aprobada con éxito.", SweetAlertIcon.Success);
-            await CargarSolicitudes();
+            NavegarAsignarVehiculo(solicitud.IdSolicitud);
         }
         else
         {
@@ -136,5 +137,10 @@ else
         {
             await Swal.FireAsync("Error", "Hubo un problema al rechazar la solicitud.", SweetAlertIcon.Error);
         }
+    }
+
+    private void NavegarAsignarVehiculo(int IdSolicitud)
+    {
+        NavigationManager.NavigateTo($"/asignar-vehiculos/{IdSolicitud}");
     }
 }

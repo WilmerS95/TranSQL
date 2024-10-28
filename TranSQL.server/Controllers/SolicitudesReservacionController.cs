@@ -81,7 +81,7 @@ namespace TranSQL.server.Controllers
         }
 
         [HttpPut("aprobar/{id}")]
-        public async Task<IActionResult> AprobarSolicitud(int id, [FromBody] RechazoSolicitudDTO aprobacionDto)
+        public async Task<IActionResult> AprobarSolicitud(int id)
         {
             try
             {

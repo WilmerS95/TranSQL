@@ -53,6 +53,30 @@ namespace TranSQL.server.Controllers
             return Ok(disponibles);
         }
 
+        // PUT: api/vehiculos/asignar-vehiculos/{idSolicitud}
+        [HttpPut("asignar-vehiculos/{idSolicitud}")]
+        public async Task<IActionResult> AsignarVehiculos(int idSolicitud, [FromBody] List<string> placasSeleccionadas)
+        {
+            var solicitud = await _context.SolicitudesReservacion.FindAsync(idSolicitud);
+            if (solicitud == null)
+            {
+                return NotFound("Solicitud no encontrada");
+            }
+
+            var vehiculos = await _context.Vehiculos
+                .Where(v => placasSeleccionadas.Contains(v.Placa) && v.IdEstadoVehiculo == 1)
+                .ToListAsync();
+
+            foreach (var vehiculo in vehiculos)
+            {
+                vehiculo.IdEstadoVehiculo = 2;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Vehículos asignados y estado actualizado.");
+        }
+
+
         // GET api/<VehiculosController>/5
         [HttpGet("{placa}")]
         public async Task<ActionResult<VehiculoDto>> GetVehiculo(string placa)
