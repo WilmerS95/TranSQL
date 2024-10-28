@@ -3,9 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TranSQL.shared.Services;
-using System.Globalization;
-using TranSQL.client.Services;
+using TranSQL.server.Models;
+using TranSQL.server.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Agregar servicios al contenedor.
@@ -68,6 +67,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddTransient<EmailService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();

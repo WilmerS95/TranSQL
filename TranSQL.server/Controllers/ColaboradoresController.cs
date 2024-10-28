@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TranSQL.shared.DTO;
 using TranSQL.shared.models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -44,12 +45,49 @@ namespace TranSQL.server.Controllers
 
         // POST api/<ColaboradoresController>
         [HttpPost]
-        public async Task<ActionResult<Colaborador>> PostColaborador(Colaborador colaborador)
+        public async Task<ActionResult<Colaborador>> PostColaborador([FromBody] ColaboradorCreateDTO colaboradorDto)
         {
-            _context.Colaboradores.Add(colaborador);
-            await _context.SaveChangesAsync();
+            // Verificar que el IdDepartamento está presente
+            if (colaboradorDto.IdDepartamento == 0)
+            {
+                return BadRequest(new { message = "El IdDepartamento es obligatorio." });
+            }
 
-            return CreatedAtAction("GetColaborador", new { id = colaborador.IdColaborador }, colaborador);
+            // Buscar el departamento existente en la base de datos
+            var departamentoExistente = await _context.Departamentos.FindAsync(colaboradorDto.IdDepartamento);
+
+            if (departamentoExistente == null)
+            {
+                return BadRequest(new { message = "El Departamento especificado no existe." });
+            }
+
+            // Crear el nuevo objeto Colaborador usando el DTO y asignar el departamento
+            var nuevoColaborador = new Colaborador
+            {
+                PrimerNombre = colaboradorDto.PrimerNombre,
+                SegundoNombre = colaboradorDto.SegundoNombre,
+                PrimerApellido = colaboradorDto.PrimerApellido,
+                SegundoApellido = colaboradorDto.SegundoApellido,
+                ApellidoDeCasada = colaboradorDto.ApellidoDeCasada,
+                Correo = colaboradorDto.Correo,
+                Password = colaboradorDto.Password,
+                IdDepartamento = colaboradorDto.IdDepartamento,
+                Departamento = departamentoExistente
+            };
+
+            // Agregar el nuevo colaborador
+            _context.Colaboradores.Add(nuevoColaborador);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al guardar el colaborador: {ex.Message}");
+            }
+
+            return CreatedAtAction(nameof(GetColaborador), new { id = nuevoColaborador.IdColaborador }, nuevoColaborador);
         }
 
         // PUT api/<ColaboradoresController>/5

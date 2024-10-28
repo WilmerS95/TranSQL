@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TranSQL.shared.models;
-using TranSQL.shared.Services;
 using TranSQL.shared.DTO;
+using TranSQL.server.Services;
+using Azure.Core;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -150,20 +151,116 @@ namespace TranSQL.server.Controllers
         [HttpPost]
         public async Task<ActionResult<SolicitudReservacion>> PostSolicitudReservacion(SolicitudReservacionDTO solicitudDto)
         {
-            // Mapea el DTO al modelo principal
-            var solicitudReservacion = new SolicitudReservacion
+            try
             {
-                Motivo = solicitudDto.Motivo,
-                Fecha = solicitudDto.Fecha,
-                IdColaborador = solicitudDto.IdColaborador,
-                IdEstadoSolicitud = 3
-            };
+                // Busca el colaborador en la base de datos
+                var colaborador = await _context.Colaboradores.FindAsync(solicitudDto.IdColaborador);
 
-            _context.SolicitudesReservacion.Add(solicitudReservacion);
-            await _context.SaveChangesAsync();
+                if (colaborador == null)
+                {
+                    return BadRequest("Colaborador no encontrado.");
+                }
 
-            return CreatedAtAction(nameof(GetSolicitudReservacion), new { id = solicitudReservacion.IdSolicitud }, solicitudReservacion);
-        }
+                // Mapea el DTO al modelo principal
+                var solicitudReservacion = new SolicitudReservacion
+                {
+                    Motivo = solicitudDto.Motivo,
+                    Fecha = solicitudDto.Fecha,
+                    IdColaborador = solicitudDto.IdColaborador,
+                    IdEstadoSolicitud = 3
+                };
+
+                _context.SolicitudesReservacion.Add(solicitudReservacion);
+                await _context.SaveChangesAsync();
+
+                // Enviar notificación por correo a todos los colaboradores de Logística
+                var logisticsEmails = await _context.Colaboradores
+                    .Where(c => c.Departamento.NombreDepartamento == "Logística")
+                    .Select(c => c.Correo)
+                    .ToListAsync();
+
+                string nombreColaborador = $"{colaborador.PrimerNombre} {colaborador.SegundoNombre} {colaborador.PrimerApellido} {colaborador.SegundoApellido} {colaborador.ApellidoDeCasada}";
+                string motivoViaje = solicitudDto.Motivo;
+                if (logisticsEmails.Any())
+                {
+                    var subject = "Nueva solicitud de reservación de vehículo";
+                    //var body = $"El colaborador {nombreColaborador} ha generado una nueva solicitud de reserva.";
+
+                    string body = $@"
+                        <html>
+                            <head>
+                                <style>
+                                    body {{
+                                        font-family: Arial, sans-serif;
+                                        margin: 0;
+                                        padding: 0;
+                                        background-color: #f4f4f4;
+                                        color: #333;
+                                        display: flex;
+                                        justify-content: center;
+                                        align-items: center;
+                                        height: 100vh;
+                                        padding: 20px;
+                                    }}
+                                    .container {{
+                                        max-width: 600px;
+                                        background-color: #fff;
+                                        border-radius: 8px;
+                                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                                        padding: 20px;
+                                        text-align: center;
+                                    }}
+                                    h2 {{
+                                        color: #4CAF50;
+                                        font-size: 28px;
+                                        margin-bottom: 10px;
+                                    }}
+                                    p {{
+                                        font-size: 16px;
+                                        line-height: 1.6;
+                                    }}
+                                    .button {{
+                                        display: inline-block;
+                                        padding: 12px 24px;
+                                        margin-top: 20px;
+                                        color: white;
+                                        background-color: #4CAF50;
+                                        text-decoration: none;
+                                        border-radius: 5px;
+                                        font-size: 18px;
+                                        transition: background-color 0.3s ease;
+                                    }}
+                                    .button:hover {{
+                                        background-color: #45a049;
+                                    }}
+                                </style>
+                            </head>
+                            <body>
+                                <div class='container'>
+                                    <h2>Solicitud de Reservación Creada</h2>
+                                    <p>El colaborador <strong>{nombreColaborador}</strong> ha realizado una nueva solicitud de reservación.</p>
+                                    <p><strong>Motivo del viaje:</strong> {motivoViaje}</p>
+                                    <p>Haz clic en el botón de abajo para ver las solicitudes pendientes:</p>
+                                    <a href='https://youtu.be/OZy2jzXuDd4?si=RczQsCcJSONlG4vu' class='button'>
+                                        Ver Video de Cuisillos musical!!!
+                                    </a>
+                                </div>
+                            </body>
+                        </html>";
+
+
+                    await _emailService.SendEmailAsync(logisticsEmails,subject, body, true);
+                }
+
+                return CreatedAtAction(nameof(GetSolicitudReservacion), new { id = solicitudReservacion.IdSolicitud }, solicitudReservacion);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al guardar la solicitud: {ex.Message}");
+                return StatusCode(500, "Error interno al procesar la solicitud.");
+            }
+            }
 
         // PUT api/<SolicitudesReservacionController>/5
         [HttpPut("{id}")]
