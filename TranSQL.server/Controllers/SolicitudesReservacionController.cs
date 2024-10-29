@@ -80,6 +80,32 @@ namespace TranSQL.server.Controllers
             return Ok(solicitudesPendientes);
         }
 
+        [HttpGet("{idSolicitud}")]
+        public async Task<ActionResult<SolicitudReservacionNotificacionDTO>> GetSolicitudDetalles(int idSolicitud)
+        {
+            var solicitud = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador)
+                .FirstOrDefaultAsync(s => s.IdSolicitud == idSolicitud);
+
+            if (solicitud == null)
+            {
+                return NotFound();
+            }
+
+            var solicitudDto = new SolicitudReservacionNotificacionDTO
+            {
+                IdSolicitud = solicitud.IdSolicitud,
+                Motivo = solicitud.Motivo,
+                Fecha = solicitud.Fecha,
+                IdColaborador = (int)solicitud.IdColaborador,
+                NombreColaborador = $"{solicitud.Colaborador.PrimerNombre} {solicitud.Colaborador.PrimerApellido}"
+            };
+
+            return Ok(solicitudDto);
+        }
+
+
+
         [HttpPut("aprobar/{id}")]
         public async Task<IActionResult> AprobarSolicitud(int id)
         {

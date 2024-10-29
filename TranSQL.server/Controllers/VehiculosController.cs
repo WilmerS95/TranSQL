@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TranSQL.shared.models;
+using TranSQL.shared.DTO;
 
 namespace TranSQL.server.Controllers
 {
@@ -109,8 +110,19 @@ namespace TranSQL.server.Controllers
 
         // POST api/<VehiculosController>
         [HttpPost]
-        public async Task<ActionResult<Vehiculo>> PostVehiculo(Vehiculo vehiculo)
+        public async Task<ActionResult<Vehiculo>> PostVehiculo(CreateVehiculoDTO vehiculoDto)
         {
+            // Mapea el DTO al modelo Vehiculo
+            var vehiculo = new Vehiculo
+            {
+                Placa = vehiculoDto.Placa,
+                Modelo = vehiculoDto.Modelo,
+                OdometroInicial = vehiculoDto.OdometroInicial,
+                OdometroFinal = vehiculoDto.OdometroFinal,
+                IdTipoVehiculo = vehiculoDto.IdTipoVehiculo,
+                IdEstadoVehiculo = vehiculoDto.IdEstadoVehiculo
+            };
+
             _context.Vehiculos.Add(vehiculo);
             await _context.SaveChangesAsync();
 
