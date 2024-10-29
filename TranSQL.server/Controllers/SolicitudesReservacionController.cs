@@ -133,7 +133,10 @@ namespace TranSQL.server.Controllers
         [HttpPut("rechazar/{id}")]
         public async Task<IActionResult> RechazarSolicitud(int id, [FromBody] RechazoSolicitudDTO rechazoDto)
         {
-            var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
+            var solicitud = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador) // Incluye Colaborador
+                .FirstOrDefaultAsync(s => s.IdSolicitud == id);
+
             if (solicitud == null) return NotFound();
 
             if (string.IsNullOrWhiteSpace(rechazoDto.MotivoRechazo))
@@ -142,9 +145,10 @@ namespace TranSQL.server.Controllers
             // Asigna el motivo de rechazo a la propiedad JustificacionRechazo
             solicitud.IdEstadoSolicitud = 2; // Estado Rechazado
             solicitud.JustificacionRechazo = rechazoDto.MotivoRechazo;
-
             _context.SolicitudesReservacion.Update(solicitud);
             await _context.SaveChangesAsync();
+
+            await NotificarRechazo(solicitud, rechazoDto.MotivoRechazo);
             return NoContent();
         }
 
@@ -171,6 +175,22 @@ namespace TranSQL.server.Controllers
                 .ToListAsync();
 
             return Ok(solicitudes);
+        }
+
+        private async Task NotificarRechazo(SolicitudReservacion solicitud, string motivoRechazo)
+        {
+            string subject = "Solicitud de reservación rechazada";
+            string body = $@"
+                <html>
+                    <body>
+                        <h2>Solicitud de Reservación Rechazada</h2>
+                        <p>Estimado/a {solicitud.Colaborador.PrimerNombre} {solicitud.Colaborador.PrimerApellido},</p>
+                        <p>Lamentamos informarle que su solicitud de reservación ha sido rechazada.</p>
+                        <p><strong>Motivo del rechazo:</strong> {motivoRechazo}</p>
+                    </body>
+                </html>";
+
+            await _emailService.SendEmailAsync(new List<string> { solicitud.Colaborador.Correo }, subject, body, true);
         }
 
         // POST api/<SolicitudesReservacionController>
