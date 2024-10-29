@@ -7,6 +7,11 @@ using TranSQL.server.Models;
 using TranSQL.server.Services;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5000);
+});
+
 // Agregar servicios al contenedor.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

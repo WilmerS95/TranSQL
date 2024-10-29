@@ -25,6 +25,8 @@ builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ReservacionService>();
 //builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://192.168.1.58:7223") });
+
 builder.Services.AddSweetAlert2();
 
 await builder.Build().RunAsync();
