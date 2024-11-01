@@ -31,7 +31,7 @@
                             <li class="list-group-item dashboard-item" @onclick="IrAGestionSolicitudes">
                                 <i class="bi bi-gear-fill me-2"></i> Gestionar Solicitudes
                             </li>
-                            <li class="list-group-item dashboard-item" @onclick="IrAAsignaciones">
+                            <li class="list-group-item dashboard-item" @onclick="IrAVehiculos">
                                 <i class="bi bi-people-fill me-2"></i> Asignar Vehículos
                             </li>
                             <li class="list-group-item dashboard-item" @onclick="IrAInspecciones">
@@ -97,4 +97,5 @@
     private void IrASolicitudReservacion() => NavigationManager.NavigateTo("/solicitud-reservacion");
     private void IrASolicitudes() => NavigationManager.NavigateTo($"/solicitudes?idColaborador={idColaborador}");
     private void IrAGestionSolicitudes() => NavigationManager.NavigateTo($"/logistica-solicitudes");
+    private void IrAVehiculos() => NavigationManager.NavigateTo($"/vehiculos");
 }

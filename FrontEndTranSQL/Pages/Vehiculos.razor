@@ -1,56 +1,64 @@
-﻿@using TranSQL.client.Services;
-@using TranSQL.shared;
-@using TranSQL.shared.models;
+﻿@page "/vehiculos"
 
-@page "/vehiculos"
-@inject VehiculoService vehiculoService
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+@inject IVehiculoService VehiculoService
 
-<h3>Vehículos</h3>
+<h3>Gestión de Vehículos</h3>
 
-@if (vehiculos == null)
+@if (vehiculos != null)
 {
-    <p><em>Loading...</em></p>
-}
-else if (vehiculos.Count == 0)
-{
-    <p>No se encontraron vehículos.</p>
+    @foreach (var vehiculo in vehiculos)
+    {
+        <div>
+            <h4>Placa: @vehiculo.Placa</h4>
+            <p>Modelo: @vehiculo.Modelo</p>
+            <p>Odómetro Inicial: @vehiculo.OdometroInicial</p>
+            <p>Odómetro Final: @vehiculo.OdometroFinal</p>
+            <p>Estado: @vehiculo.EstadoVehiculo</p>
+            <p>Tipo de Vehículo: @vehiculo.TipoVehiculo</p>
+
+            <h5>Asignaciones</h5>
+            <ul>
+                @foreach (var asignacion in vehiculo.Asignaciones)
+                {
+                    <li>
+                        <p>Solicitud: @asignacion.SolicitudReservacion.Motivo</p>
+                        <p>Fecha: @asignacion.SolicitudReservacion.Fecha.ToShortDateString()</p>
+                        <p>Colaborador: @asignacion.Colaborador.PrimerNombre @asignacion.Colaborador.PrimerApellido</p>
+                    </li>
+                }
+            </ul>
+
+            <label>Actualizar Estado:</label>
+            <select @onchange="(e) => CambiarEstadoVehiculo(vehiculo.Placa, e.Value.ToString())">
+                <option value="1">Disponible</option>
+                <option value="2">Reservado</option>
+                <option value="3">En Ruta</option>
+            </select>
+        </div>
+    }
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Placa</th>
-                <th>Modelo</th>
-                <th>Odómetro Inicial</th>
-                <th>Odómetro Final</th>
-                <th>Tipo Vehículo</th>
-                <th>Estado Vehículo</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var vehiculo in vehiculos)
-            {
-                <tr>
-                    <td>@vehiculo.Placa</td>
-                    <td>@vehiculo.Modelo</td>
-                    <td>@vehiculo.OdometroInicial</td>
-                    <td>@vehiculo.OdometroFinal</td>
-                    <!-- Verificación si tipoVehiculo es nulo -->
-                    <td>@(vehiculo.TipoVehiculo?.NombreTipoVehiculo ?? "Sin tipo")</td>
-                    <!-- Verificación si estadoVehiculo es nulo -->
-                    <td>@(vehiculo.EstadoVehiculo?.NombreEstadoVehiculo ?? "Sin estado")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <p>Cargando vehículos...</p>
 }
 
 @code {
-    private List<Vehiculo>? vehiculos;
+    private List<VehiculoAsignacionDTO> vehiculos;
 
     protected override async Task OnInitializedAsync()
     {
-        vehiculos = await vehiculoService.GetVehiculosAsync();
+        vehiculos = await VehiculoService.ObtenerVehiculosAsignadosAsync();
+    }
+
+    private async Task CambiarEstadoVehiculo(string placa, string nuevoEstado)
+    {
+        if (int.TryParse(nuevoEstado, out int estadoId))
+        {
+            await VehiculoService.UpdateVehiculoEstadoAsync(placa, estadoId);
+            vehiculos = await VehiculoService.ObtenerVehiculosAsignadosAsync();
+            StateHasChanged();
+        }
     }
 }

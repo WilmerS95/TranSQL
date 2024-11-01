@@ -111,7 +111,10 @@ namespace TranSQL.server.Controllers
         {
             try
             {
-                var solicitud = await _context.SolicitudesReservacion.FindAsync(id);
+                var solicitud = await _context.SolicitudesReservacion
+                .Include(s => s.Colaborador) // Incluye Colaborador
+                .FirstOrDefaultAsync(s => s.IdSolicitud == id);
+
                 if (solicitud == null) return NotFound();
 
                 solicitud.IdEstadoSolicitud = 1; // Aprobado
@@ -120,6 +123,7 @@ namespace TranSQL.server.Controllers
                 _context.SolicitudesReservacion.Update(solicitud);
                 await _context.SaveChangesAsync();
 
+                await NotificarAprobado(solicitud);
                 return NoContent();
             }
             catch (Exception ex)
@@ -187,6 +191,22 @@ namespace TranSQL.server.Controllers
                         <p>Estimado/a {solicitud.Colaborador.PrimerNombre} {solicitud.Colaborador.PrimerApellido},</p>
                         <p>Lamentamos informarle que su solicitud de reservación ha sido rechazada.</p>
                         <p><strong>Motivo del rechazo:</strong> {motivoRechazo}</p>
+                    </body>
+                </html>";
+
+            await _emailService.SendEmailAsync(new List<string> { solicitud.Colaborador.Correo }, subject, body, true);
+        }
+
+        private async Task NotificarAprobado(SolicitudReservacion solicitud)
+        {
+            string subject = "Solicitud de reservación Aprobada";
+            string body = $@"
+                <html>
+                    <body>
+                        <h2>Solicitud de Reservación Aprobada</h2>
+                        <p>Estimado/a {solicitud.Colaborador.PrimerNombre} {solicitud.Colaborador.PrimerApellido},</p>
+                        <p>Nos complace informarle que su solicitud de reservación ha sido aprobada.</p>
+                        <p>En un momento recibirá otra notificación informando qué vehículo/s le serán asignados.</p>
                     </body>
                 </html>";
 
@@ -288,7 +308,7 @@ namespace TranSQL.server.Controllers
                                     <p><strong>Motivo del viaje:</strong> {motivoViaje}</p>
                                     <p>Haz clic en el botón de abajo para ver las solicitudes pendientes:</p>
                                     <a href='https://youtu.be/OZy2jzXuDd4?si=RczQsCcJSONlG4vu' class='button'>
-                                        Ver Video de Cuisillos musical!!!
+                                        Ver solicitudes pendientes
                                     </a>
                                 </div>
                             </body>

@@ -19,6 +19,45 @@ namespace TranSQL.server.Controllers
             _context = context;
         }
 
+        [HttpGet("management")]
+        public async Task<ActionResult<IEnumerable<VehiculoManagementDTO>>> GetVehiculoManagementInfo()
+        {
+            var vehiculos = await _context.Vehiculos
+                .Include(v => v.EstadoVehiculo)
+                .Include(v => v.Asignaciones)
+                .ThenInclude(a => a.SolicitudReservacion)
+                .ThenInclude(s => s.Colaborador)
+                .Select(v => new VehiculoManagementDTO
+                {
+                    Placa = v.Placa,
+                    Modelo = v.Modelo,
+                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo,
+                    Asignacion = v.Asignaciones.Select(a => new AsignacionInfoDTO
+                    {
+                        Fecha = a.SolicitudReservacion.Fecha,
+                        Colaborador = $"{a.SolicitudReservacion.Colaborador.PrimerNombre} {a.SolicitudReservacion.Colaborador.PrimerApellido}",
+                        EstadoSolicitud = a.EstadoSolicitud.NombreEstadoSolicitud
+                    }).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(vehiculos);
+        }
+
+        [HttpPut("{placa}/estado")]
+        public async Task<IActionResult> UpdateVehicleStatus(string placa, [FromBody] UpdateVehicleStatusDTO updateDto)
+        {
+            var vehiculo = await _context.Vehiculos.FindAsync(placa);
+            if (vehiculo == null) return NotFound();
+
+            vehiculo.IdEstadoVehiculo = updateDto.NuevoEstado;
+            _context.Entry(vehiculo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
         // GET: api/<VehiculosController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VehiculoDto>>> GetVehiculos()
