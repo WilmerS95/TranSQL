@@ -24,6 +24,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.Get
 //builder.Services.AddScoped<VehiculoService>();
 builder.Services.AddScoped<ReservacionService>();
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
+builder.Services.AddScoped<InspeccionVehiculoService>();
+builder.Services.AddScoped<InspeccionService>();
 //builder.Services.AddScoped<IEmailService, EmailService>();
 
 //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://192.168.1.58:7223") });

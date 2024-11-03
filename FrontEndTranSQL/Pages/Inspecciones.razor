@@ -1,7 +1,125 @@
-﻿@page "/inspecciones"
+﻿@using TranSQL.client.Services
+@using TranSQL.shared.models
 
-<h3>Gestión de Inspecciones</h3>
+@page "/inspecciones"
+@inject InspeccionVehiculoService InspeccionService
+
+<h3>Gestión de Inspecciones de Vehículos</h3>
+
+@if (inspecciones == null)
+{
+    <p>Cargando inspecciones...</p>
+}
+else
+{
+    <button @onclick="MostrarFormularioAgregar">Agregar Nueva Inspección</button>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Observaciones</th>
+                <th>Odómetro Inicial</th>
+                <th>Odómetro Final</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inspeccion in inspecciones)
+            {
+                <tr>
+                    <td>@inspeccion.FechaInspeccion.ToShortDateString()</td>
+                    <td>@inspeccion.Observaciones</td>
+                    <td>@inspeccion.OdometroInicial</td>
+                    <td>@inspeccion.OdometroFinal</td>
+                    <td>
+                        <button @onclick="() => EditarInspeccion(inspeccion.IdInspeccion)">Editar</button>
+                        <button @onclick="() => EliminarInspeccion(inspeccion.IdInspeccion)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* Formulario para agregar o editar inspección *@
+@if (mostrarFormulario)
+{
+    <div>
+        <h4>@(editarInspeccion.IdInspeccion > 0 ? "Editar Inspección" : "Agregar Inspección")</h4>
+        <EditForm Model="editarInspeccion" OnValidSubmit="GuardarInspeccion">
+            <div>
+                <label>Fecha:</label>
+                <InputDate @bind-Value="editarInspeccion.FechaInspeccion" />
+            </div>
+            <div>
+                <label>Observaciones:</label>
+                <InputText @bind-Value="editarInspeccion.Observaciones" />
+            </div>
+            <div>
+                <label>Odómetro Inicial:</label>
+                <InputNumber @bind-Value="editarInspeccion.OdometroInicial" />
+            </div>
+            <div>
+                <label>Odómetro Final:</label>
+                <InputNumber @bind-Value="editarInspeccion.OdometroFinal" />
+            </div>
+            <button type="submit">Guardar</button>
+            <button @onclick="Cancelar">Cancelar</button>
+        </EditForm>
+    </div>
+}
 
 @code {
+    private List<InspeccionVehiculo> inspecciones;
+    private bool mostrarFormulario = false;
+    private InspeccionVehiculo editarInspeccion = new InspeccionVehiculo();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarInspecciones();
+    }
+
+    private async Task CargarInspecciones()
+    {
+        inspecciones = await InspeccionService.GetInspeccionesAsync();
+    }
+
+    private void MostrarFormularioAgregar()
+    {
+        editarInspeccion = new InspeccionVehiculo();
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarInspeccion()
+    {
+        if (editarInspeccion.IdInspeccion == 0)
+        {
+            await InspeccionService.CreateInspeccionAsync(editarInspeccion);
+        }
+        else
+        {
+            await InspeccionService.UpdateInspeccionAsync(editarInspeccion.IdInspeccion, editarInspeccion);
+        }
+
+        mostrarFormulario = false;
+        await CargarInspecciones();
+    }
+
+    private void EditarInspeccion(int id)
+    {
+        editarInspeccion = inspecciones.First(i => i.IdInspeccion == id);
+        mostrarFormulario = true;
+    }
+
+    private async Task EliminarInspeccion(int id)
+    {
+        await InspeccionService.DeleteInspeccionAsync(id);
+        await CargarInspecciones();
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
 }

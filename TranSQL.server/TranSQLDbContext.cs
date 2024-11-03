@@ -5,9 +5,7 @@ namespace TranSQL.server
 {
     public class TranSQLDbContext : DbContext
     {
-        public TranSQLDbContext(DbContextOptions<TranSQLDbContext> options) : base(options)
-        {
-        }
+        public TranSQLDbContext(DbContextOptions<TranSQLDbContext> options) : base(options) { }
 
         public DbSet<Accesorio> Accesorios { get; set; }
         public DbSet<Asignacion> Asignaciones { get; set; }
@@ -25,7 +23,6 @@ namespace TranSQL.server
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Especificar los nombres de tablas y esquemas, si es necesario
             modelBuilder.Entity<Colaborador>().ToTable("Colaborador");
             modelBuilder.Entity<Departamento>().ToTable("Departamento");
             modelBuilder.Entity<Accesorio>().ToTable("Accesorio");
@@ -40,7 +37,6 @@ namespace TranSQL.server
             modelBuilder.Entity<TipoVehiculo>().ToTable("TipoVehiculo");
             modelBuilder.Entity<Vehiculo>().ToTable("Vehiculo");
 
-            // Relaciones y configuraciones adicionales
             modelBuilder.Entity<Vehiculo>()
                 .HasOne(v => v.TipoVehiculo)
                 .WithMany(t => t.Vehiculos)
@@ -51,22 +47,9 @@ namespace TranSQL.server
                 .WithMany(e => e.Vehiculos)
                 .HasForeignKey(v => v.IdEstadoVehiculo);
 
-            //// Configuración de SolicitudReservacion
-            //modelBuilder.Entity<SolicitudReservacion>()
-            //    .HasOne(s => s.Colaborador)
-            //    .WithMany()
-            //    .HasForeignKey(s => s.IdColaborador)
-            //    .OnDelete(DeleteBehavior.Restrict);  // Evita eliminaciones en cascada
-
             modelBuilder.Entity<SolicitudReservacion>()
-                .Property(s => s.Motivo)
-                .IsRequired(false);  // Permite nulos para este campo
-
-            //modelBuilder.Entity<SolicitudReservacion>()
-            //    .HasOne(s => s.EstadoSolicitud)
-            //    .WithMany()
-            //    .HasForeignKey(s => s.IdEstadoSolicitud)
-            //    .OnDelete(DeleteBehavior.Restrict);  // Evita eliminaciones en cascada
+               .Property(s => s.Motivo)
+               .IsRequired(false);
 
             modelBuilder.Entity<SolicitudReservacion>()
                 .HasOne(s => s.Colaborador)
@@ -89,6 +72,31 @@ namespace TranSQL.server
                 .HasOne(a => a.SolicitudReservacion)
                 .WithMany(s => s.Asignaciones)
                 .HasForeignKey(a => a.IdSolicitud);
+
+            // Relaciones y configuraciones adicionales
+            modelBuilder.Entity<InspeccionVehiculo>()
+                .HasOne(i => i.Accesorio)
+                .WithMany()
+                .HasForeignKey(i => i.IdAccesorio)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InspeccionVehiculo>()
+                .HasOne(i => i.Colaborador)
+                .WithMany()
+                .HasForeignKey(i => i.IdColaborador)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InspeccionVehiculo>()
+                .HasOne(i => i.Reservacion)
+                .WithMany()
+                .HasForeignKey(i => i.IdReservacion)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InspeccionVehiculo>()
+                .HasOne(i => i.TipoInspeccion)
+                .WithMany()
+                .HasForeignKey(i => i.IdTipoInspeccion)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Llama a la configuración base
             base.OnModelCreating(modelBuilder);
