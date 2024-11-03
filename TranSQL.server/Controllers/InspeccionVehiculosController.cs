@@ -4,6 +4,7 @@ using TranSQL.shared.models;
 using TranSQL.shared.DTO;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace TranSQL.server.Controllers
@@ -32,42 +33,15 @@ namespace TranSQL.server.Controllers
             {
                 IdInspeccion = inspeccion.IdInspeccion,
                 FechaInspeccion = inspeccion.FechaInspeccion,
-                Observaciones = inspeccion.Observaciones,
+                Observaciones = inspeccion.Observaciones ?? string.Empty,
                 OdometroInicial = inspeccion.OdometroInicial,
                 OdometroFinal = inspeccion.OdometroFinal,
-                ImagenRuta = inspeccion.ImagenRuta,
+                ImagenRuta = inspeccion.ImagenRuta ?? string.Empty,
                 IdReservacion = inspeccion.IdReservacion,
-                ColaboradorNombre = $"{inspeccion.Colaborador?.PrimerNombre} {inspeccion.Colaborador?.PrimerApellido}",
-                AccesorioNombre = inspeccion.Accesorio?.NombreAccesorio,
-                TipoInspeccionNombre = inspeccion.TipoInspeccion?.NombreTipoInsepccion
+                ColaboradorNombre = inspeccion.Colaborador != null ? $"{inspeccion.Colaborador.PrimerNombre} {inspeccion.Colaborador.PrimerApellido}" : "Sin Asignar",
+                AccesorioNombre = inspeccion.Accesorio?.NombreAccesorio ?? "Sin Accesorio",
+                TipoInspeccionNombre = inspeccion.TipoInspeccion?.NombreTipoInsepccion ?? "Tipo No Especificado"
             };
-        }
-
-        [HttpPost("{id}/imagen")]
-        public async Task<IActionResult> SubirImagen(int id, IFormFile imagen)
-        {
-            var inspeccion = await _context.InspeccionVehiculos.FindAsync(id);
-            if (inspeccion == null)
-                return NotFound("Inspección no encontrada.");
-
-            if (imagen == null || imagen.Length == 0)
-                return BadRequest("Imagen no válida.");
-
-            // Guardar la imagen en el sistema de archivos
-            var imagenNombre = $"{id}_{Path.GetRandomFileName()}{Path.GetExtension(imagen.FileName)}";
-            var rutaCompleta = Path.Combine(_imagenesPath, imagenNombre);
-
-            using (var stream = new FileStream(rutaCompleta, FileMode.Create))
-            {
-                await imagen.CopyToAsync(stream);
-            }
-
-            // Guardar la ruta de la imagen en la inspección
-            inspeccion.ImagenRuta = Path.Combine("imagenes_inspeccion", imagenNombre);
-            _context.Entry(inspeccion).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-
-            return Ok(new { RutaImagen = inspeccion.ImagenRuta });
         }
 
         [HttpGet("{id}")]
@@ -87,7 +61,6 @@ namespace TranSQL.server.Controllers
             return Ok(inspeccionDTO);
         }
 
-        // GET: api/<InspeccionVehiculosController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InspeccionVehiculoDTO>>> GetInspeccionVehiculos()
         {
@@ -98,11 +71,10 @@ namespace TranSQL.server.Controllers
                 .AsNoTracking()
                 .ToListAsync();
 
-            var inspeccionDTOs = inspecciones.ConvertAll(MapToDTO);
-            return Ok(inspeccionDTOs);
+            var inspeccionesDTO = inspecciones.Select(MapToDTO).ToList();
+            return Ok(inspeccionesDTO);
         }
 
-        // POST api/<InspeccionVehiculosController>
         [HttpPost]
         public async Task<ActionResult<InspeccionVehiculoDTO>> PostInspeccionVehiculo(InspeccionVehiculo inspeccionVehiculo)
         {
@@ -110,10 +82,9 @@ namespace TranSQL.server.Controllers
             await _context.SaveChangesAsync();
 
             var inspeccionDTO = MapToDTO(inspeccionVehiculo);
-            return CreatedAtAction("ObtenerInspeccion", new { id = inspeccionVehiculo.IdInspeccion }, inspeccionDTO);
+            return CreatedAtAction(nameof(ObtenerInspeccion), new { id = inspeccionVehiculo.IdInspeccion }, inspeccionDTO);
         }
 
-        // PUT api/<InspeccionVehiculosController>/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutInspeccionVehiculo(int id, InspeccionVehiculo inspeccionVehiculo)
         {
@@ -128,7 +99,6 @@ namespace TranSQL.server.Controllers
             return NoContent();
         }
 
-        // DELETE api/<InspeccionVehiculosController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInspeccionVehiculo(int id)
         {
@@ -142,6 +112,31 @@ namespace TranSQL.server.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("{id}/imagen")]
+        public async Task<IActionResult> SubirImagen(int id, IFormFile imagen)
+        {
+            var inspeccion = await _context.InspeccionVehiculos.FindAsync(id);
+            if (inspeccion == null)
+                return NotFound("Inspección no encontrada.");
+
+            if (imagen == null || imagen.Length == 0)
+                return BadRequest("Imagen no válida.");
+
+            var imagenNombre = $"{id}_{Path.GetRandomFileName()}{Path.GetExtension(imagen.FileName)}";
+            var rutaCompleta = Path.Combine(_imagenesPath, imagenNombre);
+
+            using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+            {
+                await imagen.CopyToAsync(stream);
+            }
+
+            inspeccion.ImagenRuta = Path.Combine("imagenes_inspeccion", imagenNombre);
+            _context.Entry(inspeccion).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { RutaImagen = inspeccion.ImagenRuta });
         }
     }
 }

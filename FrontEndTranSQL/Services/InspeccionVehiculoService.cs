@@ -1,5 +1,8 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using TranSQL.shared.models;
+using Microsoft.AspNetCore.Components.Forms;
+using TranSQL.shared.DTO;
 
 namespace TranSQL.client.Services
 {
@@ -12,31 +15,34 @@ namespace TranSQL.client.Services
             _httpClient = httpClient;
         }
 
-        public async Task<List<InspeccionVehiculo>> GetInspeccionesAsync()
+        public async Task<List<InspeccionVehiculoDTO>> GetInspeccionesAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<InspeccionVehiculo>>("api/InspeccionVehiculos");
+            return await _httpClient.GetFromJsonAsync<List<InspeccionVehiculoDTO>>("api/InspeccionVehiculos");
         }
 
-        public async Task<InspeccionVehiculo> GetInspeccionByIdAsync(int id)
+        public async Task CreateInspeccionAsync(InspeccionVehiculo inspeccion)
         {
-            return await _httpClient.GetFromJsonAsync<InspeccionVehiculo>($"api/InspeccionVehiculos/{id}");
+            await _httpClient.PostAsJsonAsync("api/InspeccionVehiculos", inspeccion);
         }
 
-        public async Task<bool> CreateInspeccionAsync(InspeccionVehiculo inspeccion)
+        public async Task UpdateInspeccionAsync(int id, InspeccionVehiculo inspeccion)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/InspeccionVehiculos", inspeccion);
-            return response.IsSuccessStatusCode;
+            await _httpClient.PutAsJsonAsync($"api/InspeccionVehiculos/{id}", inspeccion);
         }
 
-        public async Task<bool> UpdateInspeccionAsync(int id, InspeccionVehiculo inspeccion)
+        public async Task DeleteInspeccionAsync(int id)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/InspeccionVehiculos/{id}", inspeccion);
-            return response.IsSuccessStatusCode;
+            await _httpClient.DeleteAsync($"api/InspeccionVehiculos/{id}");
         }
 
-        public async Task<bool> DeleteInspeccionAsync(int id)
+        public async Task<bool> SubirImagenAsync(int inspeccionId, IBrowserFile imagen)
         {
-            var response = await _httpClient.DeleteAsync($"api/InspeccionVehiculos/{id}");
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(imagen.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5));
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(imagen.ContentType);
+            content.Add(fileContent, "imagen", imagen.Name);
+
+            var response = await _httpClient.PostAsync($"api/InspeccionVehiculos/{inspeccionId}/imagen", content);
             return response.IsSuccessStatusCode;
         }
     }

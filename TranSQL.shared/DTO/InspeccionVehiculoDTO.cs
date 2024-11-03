@@ -6,13 +6,13 @@ namespace TranSQL.shared.DTO
     {
         public int IdInspeccion { get; set; }
         public DateTime FechaInspeccion { get; set; }
-        public string Observaciones { get; set; }
-        public int OdometroInicial { get; set; }
-        public int OdometroFinal { get; set; }
-        public string ImagenRuta { get; set; }
+        public string Observaciones { get; set; } = string.Empty;
+        public int? OdometroInicial { get; set; } // Nullable para valores NULL
+        public int? OdometroFinal { get; set; } // Nullable para valores NULL
+        public string ImagenRuta { get; set; } = string.Empty; // Valor predeterminado
         public int IdReservacion { get; set; }
-        public string ColaboradorNombre { get; set; }
-        public string AccesorioNombre { get; set; }
-        public string TipoInspeccionNombre { get; set; }
+        public string? ColaboradorNombre { get; set; } // Nullable para valores NULL
+        public string? AccesorioNombre { get; set; } // Nullable para valores NULL
+        public string? TipoInspeccionNombre { get; set; } // Nullable para valores NULL
     }
 }

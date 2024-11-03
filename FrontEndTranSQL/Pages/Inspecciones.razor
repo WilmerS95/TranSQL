@@ -1,7 +1,6 @@
-﻿@using TranSQL.client.Services
+﻿@page "/inspecciones"
+@using TranSQL.client.Services
 @using TranSQL.shared.models
-
-@page "/inspecciones"
 @inject InspeccionVehiculoService InspeccionService
 
 <h3>Gestión de Inspecciones de Vehículos</h3>
@@ -13,7 +12,7 @@
 else
 {
     <button @onclick="MostrarFormularioAgregar">Agregar Nueva Inspección</button>
-    
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -42,7 +41,6 @@ else
     </table>
 }
 
-@* Formulario para agregar o editar inspección *@
 @if (mostrarFormulario)
 {
     <div>
@@ -64,6 +62,11 @@ else
                 <label>Odómetro Final:</label>
                 <InputNumber @bind-Value="editarInspeccion.OdometroFinal" />
             </div>
+            <div>
+                <label>Cargar Imágenes:</label>
+                <InputFile OnChange="HandleImagenSeleccionada" multiple />
+            </div>
+
             <button type="submit">Guardar</button>
             <button @onclick="Cancelar">Cancelar</button>
         </EditForm>
@@ -74,6 +77,7 @@ else
     private List<InspeccionVehiculo> inspecciones;
     private bool mostrarFormulario = false;
     private InspeccionVehiculo editarInspeccion = new InspeccionVehiculo();
+    private List<IBrowserFile> imagenesSeleccionadas = new List<IBrowserFile>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,7 +86,16 @@ else
 
     private async Task CargarInspecciones()
     {
-        inspecciones = await InspeccionService.GetInspeccionesAsync();
+        var inspeccionesDTO = await InspeccionService.GetInspeccionesAsync();
+        inspecciones = inspeccionesDTO.Select(dto => new InspeccionVehiculo
+            {
+                IdInspeccion = dto.IdInspeccion,
+                FechaInspeccion = dto.FechaInspeccion,
+                Observaciones = dto.Observaciones,
+                OdometroInicial = dto.OdometroInicial,
+                OdometroFinal = dto.OdometroFinal,
+                ImagenRuta = dto.ImagenRuta,
+            }).ToList();
     }
 
     private void MostrarFormularioAgregar()
@@ -102,8 +115,19 @@ else
             await InspeccionService.UpdateInspeccionAsync(editarInspeccion.IdInspeccion, editarInspeccion);
         }
 
+        foreach (var imagen in imagenesSeleccionadas)
+        {
+            await InspeccionService.SubirImagenAsync(editarInspeccion.IdInspeccion, imagen);
+        }
+
         mostrarFormulario = false;
         await CargarInspecciones();
+        imagenesSeleccionadas.Clear();
+    }
+
+    private void HandleImagenSeleccionada(InputFileChangeEventArgs e)
+    {
+        imagenesSeleccionadas = e.GetMultipleFiles().ToList();
     }
 
     private void EditarInspeccion(int id)
