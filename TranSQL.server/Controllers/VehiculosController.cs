@@ -58,26 +58,57 @@ namespace TranSQL.server.Controllers
         }
 
 
-        [HttpGet("estado/{estado}")]
-        public async Task<ActionResult<IEnumerable<VehiculoManagementDTO>>> GetVehiculosPorEstado(int estadoId)
+        [HttpGet("estado/{nombreEstado}")]
+        public async Task<ActionResult<List<VehiculoInspeccionDTO>>> GetVehiculosPorEstado(string nombreEstado)
         {
             var vehiculos = await _context.Vehiculos
                 .Include(v => v.EstadoVehiculo)
-                .Include(v => v.Asignaciones) // Include relacionado si necesitas detalles de asignación
-                .Where(v => v.IdEstadoVehiculo == estadoId)
-                .Select(v => new VehiculoManagementDTO
+                .Where(v => v.EstadoVehiculo.NombreEstadoVehiculo == nombreEstado)
+                .Select(v => new VehiculoInspeccionDTO
                 {
                     Placa = v.Placa,
                     Modelo = v.Modelo,
-                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo, // Mapeo a nombre de estado
-                    Asignacion = v.Asignaciones.Select(a => new AsignacionInfoDTO
-                    {
-                        // Propiedades de AsignacionInfoDTO que necesites
-                    }).FirstOrDefault()
+                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo,
+                    OdometroInicial = v.OdometroInicial,
+                    OdometroFinal = v.OdometroFinal
                 })
                 .ToListAsync();
 
+            Console.WriteLine($"Vehiculos encontrados: {vehiculos.Count}");
+
+            if (!vehiculos.Any())
+            {
+                return NotFound(new { message = $"No se encontraron vehículos con estado {nombreEstado}." });
+            }
+
             return Ok(vehiculos);
+        }
+
+        [HttpPut("cambiarEstado/{placa}")]
+        public async Task<IActionResult> CambiarEstadoVehiculo(string placa, [FromBody] EstadoCambioRequest request)
+        {
+            var vehiculo = await _context.Vehiculos.FirstOrDefaultAsync(v => v.Placa == placa);
+
+            if (vehiculo == null)
+            {
+                return NotFound("Vehículo no encontrado.");
+            }
+
+            var estadoVehiculo = await _context.EstadosVehiculo.FirstOrDefaultAsync(e => e.NombreEstadoVehiculo == request.NuevoEstado);
+            if (estadoVehiculo == null)
+            {
+                return BadRequest("Estado de vehículo inválido.");
+            }
+
+            vehiculo.IdEstadoVehiculo = estadoVehiculo.IdEstadoVehiculo;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        public class EstadoCambioRequest
+        {
+            public string NuevoEstado { get; set; }
         }
 
         // GET: api/<VehiculosController>

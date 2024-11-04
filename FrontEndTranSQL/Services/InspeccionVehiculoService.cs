@@ -1,58 +1,71 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using TranSQL.shared.models;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TranSQL.shared.DTO;
-using System.Net.Http;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace TranSQL.client.Services
 {
     public class InspeccionVehiculoService
     {
-        private readonly HttpClient _httpClient;
-
-        public InspeccionVehiculoService(HttpClient httpClient)
+        // Datos simulados
+        private static List<InspeccionVehiculoDTO> inspeccionesSimuladas = new List<InspeccionVehiculoDTO>
         {
-            _httpClient = httpClient;
+            new InspeccionVehiculoDTO { IdInspeccion = 1, FechaInspeccion = DateTime.Now, Observaciones = "Primera inspección", OdometroInicial = 5000, OdometroFinal = 5500 },
+            new InspeccionVehiculoDTO { IdInspeccion = 2, FechaInspeccion = DateTime.Now.AddDays(-1), Observaciones = "Segunda inspección", OdometroInicial = 2000, OdometroFinal = 2500 }
+        };
+
+        private static List<VehiculoInspeccionDTO> vehiculosSimulados = new List<VehiculoInspeccionDTO>
+        {
+            new VehiculoInspeccionDTO { Placa = "ABC123", Modelo = 2020, EstadoVehiculo = "Solicitado", OdometroInicial = 15000, OdometroFinal = 20000 },
+            new VehiculoInspeccionDTO { Placa = "DEF456", Modelo = 2021, EstadoVehiculo = "En Ruta", OdometroInicial = 3000, OdometroFinal = 4000 }
+        };
+
+        public Task<List<InspeccionVehiculoDTO>> GetInspeccionesAsync()
+        {
+            return Task.FromResult(inspeccionesSimuladas);
         }
 
-        public async Task<List<InspeccionVehiculoDTO>> GetInspeccionesAsync()
+        public Task<List<VehiculoInspeccionDTO>> GetVehiculosPorEstado(string estado)
         {
-            return await _httpClient.GetFromJsonAsync<List<InspeccionVehiculoDTO>>("api/InspeccionVehiculos");
+            var vehiculosPorEstado = vehiculosSimulados.FindAll(v => v.EstadoVehiculo == estado);
+            return Task.FromResult(vehiculosPorEstado);
         }
 
-        public async Task<List<Vehiculo>> GetVehiculosPorEstado(string estado)
+        public Task CreateInspeccionAsync(InspeccionVehiculoDTO inspeccion)
         {
-            // Realiza una llamada a la API para obtener los vehículos por estado
-            var response = await _httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/vehiculos/estado/{estado}");
-            return response ?? new List<Vehiculo>();
+            inspeccion.IdInspeccion = inspeccionesSimuladas.Count + 1;
+            inspeccionesSimuladas.Add(inspeccion);
+            return Task.CompletedTask;
         }
 
-
-        public async Task CreateInspeccionAsync(InspeccionVehiculo inspeccion)
+        public Task UpdateInspeccionAsync(int id, InspeccionVehiculoDTO inspeccion)
         {
-            await _httpClient.PostAsJsonAsync("api/InspeccionVehiculos", inspeccion);
+            var existingInspeccion = inspeccionesSimuladas.Find(i => i.IdInspeccion == id);
+            if (existingInspeccion != null)
+            {
+                existingInspeccion.FechaInspeccion = inspeccion.FechaInspeccion;
+                existingInspeccion.Observaciones = inspeccion.Observaciones;
+                existingInspeccion.OdometroInicial = inspeccion.OdometroInicial;
+                existingInspeccion.OdometroFinal = inspeccion.OdometroFinal;
+            }
+            return Task.CompletedTask;
         }
 
-        public async Task UpdateInspeccionAsync(int id, InspeccionVehiculo inspeccion)
+        public Task<bool> SubirImagenAsync(int inspeccionId, IBrowserFile imagen)
         {
-            await _httpClient.PutAsJsonAsync($"api/InspeccionVehiculos/{id}", inspeccion);
+            // Simulación de subida de imagen, siempre retorna true
+            return Task.FromResult(true);
         }
 
-        public async Task DeleteInspeccionAsync(int id)
+        public Task CambiarEstadoVehiculo(string placa, string nuevoEstado)
         {
-            await _httpClient.DeleteAsync($"api/InspeccionVehiculos/{id}");
-        }
-
-        public async Task<bool> SubirImagenAsync(int inspeccionId, IBrowserFile imagen)
-        {
-            var content = new MultipartFormDataContent();
-            var fileContent = new StreamContent(imagen.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5));
-            fileContent.Headers.ContentType = new MediaTypeHeaderValue(imagen.ContentType);
-            content.Add(fileContent, "imagen", imagen.Name);
-
-            var response = await _httpClient.PostAsync($"api/InspeccionVehiculos/{inspeccionId}/imagen", content);
-            return response.IsSuccessStatusCode;
+            var vehiculo = vehiculosSimulados.Find(v => v.Placa == placa);
+            if (vehiculo != null)
+            {
+                vehiculo.EstadoVehiculo = nuevoEstado;
+            }
+            return Task.CompletedTask;
         }
     }
 }
