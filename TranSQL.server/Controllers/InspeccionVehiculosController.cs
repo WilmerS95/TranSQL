@@ -64,16 +64,39 @@ namespace TranSQL.server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InspeccionVehiculoDTO>>> GetInspeccionVehiculos()
         {
-            var inspecciones = await _context.InspeccionVehiculos
-                .Include(i => i.Colaborador)
-                .Include(i => i.Accesorio)
-                .Include(i => i.TipoInspeccion)
-                .AsNoTracking()
-                .ToListAsync();
+            try
+            {
+                var inspecciones = await _context.InspeccionVehiculos
+                    .Include(i => i.Colaborador)
+                    .Include(i => i.Accesorio)
+                    .Include(i => i.TipoInspeccion)
+                    .AsNoTracking()
+                    .ToListAsync();
 
-            var inspeccionesDTO = inspecciones.Select(MapToDTO).ToList();
-            return Ok(inspeccionesDTO);
+                var inspeccionesDTO = inspecciones.Select(inspeccion => new InspeccionVehiculoDTO
+                {
+                    IdInspeccion = inspeccion.IdInspeccion,
+                    FechaInspeccion = inspeccion.FechaInspeccion,
+                    Observaciones = inspeccion.Observaciones ?? string.Empty,
+                    OdometroInicial = inspeccion.OdometroInicial ?? 0,
+                    OdometroFinal = inspeccion.OdometroFinal ?? 0,
+                    ImagenRuta = inspeccion.ImagenRuta ?? string.Empty,
+                    IdReservacion = inspeccion.IdReservacion,
+                    ColaboradorNombre = inspeccion.Colaborador != null
+                        ? $"{inspeccion.Colaborador.PrimerNombre ?? "Sin nombre"} {inspeccion.Colaborador.PrimerApellido ?? "Sin apellido"}"
+                        : "Sin Asignar",
+                    AccesorioNombre = inspeccion.Accesorio?.NombreAccesorio ?? "Sin Accesorio",
+                    TipoInspeccionNombre = inspeccion.TipoInspeccion?.NombreTipoInsepccion ?? "Tipo No Especificado"
+                }).ToList();
+
+                return Ok(inspeccionesDTO);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener inspecciones: {ex.Message}");
+            }
         }
+
 
         [HttpPost]
         public async Task<ActionResult<InspeccionVehiculoDTO>> PostInspeccionVehiculo(InspeccionVehiculo inspeccionVehiculo)

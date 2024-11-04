@@ -58,6 +58,28 @@ namespace TranSQL.server.Controllers
         }
 
 
+        [HttpGet("estado/{estado}")]
+        public async Task<ActionResult<IEnumerable<VehiculoManagementDTO>>> GetVehiculosPorEstado(int estadoId)
+        {
+            var vehiculos = await _context.Vehiculos
+                .Include(v => v.EstadoVehiculo)
+                .Include(v => v.Asignaciones) // Include relacionado si necesitas detalles de asignación
+                .Where(v => v.IdEstadoVehiculo == estadoId)
+                .Select(v => new VehiculoManagementDTO
+                {
+                    Placa = v.Placa,
+                    Modelo = v.Modelo,
+                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo, // Mapeo a nombre de estado
+                    Asignacion = v.Asignaciones.Select(a => new AsignacionInfoDTO
+                    {
+                        // Propiedades de AsignacionInfoDTO que necesites
+                    }).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(vehiculos);
+        }
+
         // GET: api/<VehiculosController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VehiculoDto>>> GetVehiculos()

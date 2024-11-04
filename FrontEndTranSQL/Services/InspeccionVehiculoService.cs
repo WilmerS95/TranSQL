@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using TranSQL.shared.models;
 using Microsoft.AspNetCore.Components.Forms;
 using TranSQL.shared.DTO;
+using System.Net.Http;
 
 namespace TranSQL.client.Services
 {
@@ -19,6 +20,14 @@ namespace TranSQL.client.Services
         {
             return await _httpClient.GetFromJsonAsync<List<InspeccionVehiculoDTO>>("api/InspeccionVehiculos");
         }
+
+        public async Task<List<Vehiculo>> GetVehiculosPorEstado(string estado)
+        {
+            // Realiza una llamada a la API para obtener los vehículos por estado
+            var response = await _httpClient.GetFromJsonAsync<List<Vehiculo>>($"api/vehiculos/estado/{estado}");
+            return response ?? new List<Vehiculo>();
+        }
+
 
         public async Task CreateInspeccionAsync(InspeccionVehiculo inspeccion)
         {
