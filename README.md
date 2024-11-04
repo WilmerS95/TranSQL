@@ -1,3 +1,12 @@
+
+Link para documentación, participación y video de presentación de proyecto final 
+https://drive.google.com/drive/folders/10yPTo50lWIN7rIJivtC8oYggJz1sL5he?usp=sharing
+
+
+
+
+
+
 PROYECTO 1 BASES DE DATOS 1 SECCION B 2024
 
 OBJETIVO:
