@@ -1,43 +1,120 @@
-﻿using System.Net.Mail;
+﻿using Microsoft.Extensions.Options;
+using System.Net.Mail;
 using System.Net;
+using TranSQL.server.Models;
 using TranSQL.shared.models;
-using TranSQL.shared.Services;
 
-namespace TranSQL.client.Services
+namespace TranSQL.server.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _config;
+        private readonly SmtpSettings _smtpSettings;
 
-        public EmailService(IConfiguration config)
+        public EmailService(IOptions<SmtpSettings> smtpSettings)
         {
-            _config = config;
+            _smtpSettings = smtpSettings.Value;
         }
 
-        public async Task EnviarNotificacionLogistica(SolicitudReservacion solicitud)
+        public async Task SendEmailAsync(List<string> toEmails, string subject, string body, bool isHtml = true)
         {
-            var logisticaEmails = await ObtenerCorreosLogistica(); // Obtener correos de logística desde la DB
-            var subject = "Nueva solicitud de reservación";
-            var body = $"Se ha recibido una nueva solicitud con motivo: {solicitud.Motivo}";
-
-            foreach (var email in logisticaEmails)
+            using var client = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
             {
-                using var smtp = new SmtpClient(_config["Smtp:Host"], int.Parse(_config["Smtp:Port"]))
-                {
-                    Credentials = new NetworkCredential(_config["Smtp:Username"], _config["Smtp:Password"]),
-                    EnableSsl = true
-                };
+                Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
+                EnableSsl = _smtpSettings.EnableSsl
+            };
 
-                var mailMessage = new MailMessage(_config["Smtp:From"], email, subject, body);
-                await smtp.SendMailAsync(mailMessage);
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(_smtpSettings.Username),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = isHtml
+            };
+
+            // Agregar cada destinatario
+            foreach (var email in toEmails)
+            {
+                mailMessage.To.Add(email);
             }
+
+            await client.SendMailAsync(mailMessage);
         }
 
-        private async Task<List<string>> ObtenerCorreosLogistica()
+        //public async Task SendEmailAsync(string subject, string body, List<string> recipients)
+        //{
+        //    using var smtpClient = new SmtpClient(_smtpSettings.Host, _smtpSettings.Port)
+        //    {
+        //        Credentials = new NetworkCredential(_smtpSettings.Username, _smtpSettings.Password),
+        //        EnableSsl = _smtpSettings.EnableSsl
+        //    };
+
+        //    var mailMessage = new MailMessage
+        //    {
+        //        From = new MailAddress(_smtpSettings.Username),
+        //        Subject = subject,
+        //        Body = body,
+        //        IsBodyHtml = true
+        //    };
+
+        //    foreach (var recipient in recipients)
+        //    {
+        //        mailMessage.To.Add(recipient);
+        //    }
+
+        //    await smtpClient.SendMailAsync(mailMessage);
+        //}
+
+        // 1. Notificar al departamento de logística sobre nueva solicitud
+        //public async Task NotifyLogisticsOnNewRequest(Colaborador requester)
+        //{
+        //    var logisticsEmails = GetDepartmentEmails("Logística"); // Método para obtener correos de Logística
+        //    var subject = "Nueva solicitud de reservación de vehículo";
+        //    //var body = $"El colaborador {requester.PrimerNombre} {requester.PrimerApellido} ha generado una nueva solicitud de reserva.";
+
+        //    string body = $@"
+        //<html>
+        //    <body>
+        //        <h2>Solicitud de Reservación Creada</h2>
+        //        <p>El colaborador <strong>{requester.PrimerNombre} {requester.PrimerApellido}</strong> ha realizado una nueva solicitud de reservación.</p>
+        //        <p>Haz clic en el botón de abajo para ver las solicitudes pendientes:</p>
+        //        <a href='https://youtu.be/OZy2jzXuDd4?si=RczQsCcJSONlG4vu' 
+        //           style='display: inline-block; padding: 10px 20px; color: white; background-color: #4CAF50; text-align: center; text-decoration: none; border-radius: 5px;'>
+        //            Ver Solicitudes Pendientes
+        //        </a>
+        //    </body>
+        //</html>";
+
+        //    await SendEmailAsync(logisticsEmails, subject, body, true);
+        //}
+
+        // 2. Notificar al solicitante sobre el rechazo de su solicitud
+        //public async Task NotifyRequesterOnRejection(Colaborador requester)
+        //{
+        //    var subject = "Su solicitud de reservación ha sido rechazada";
+        //    var body = $"Estimado {requester.PrimerNombre}, su solicitud de reservación de vehículo ha sido rechazada.";
+
+        //    await SendEmailAsync(subject, body, new List<string> { requester.Correo });
+        //}
+
+        // 3. Notificar al solicitante y a seguridad cuando la solicitud es aprobada
+        //public async Task NotifyOnApproval(Colaborador requester, List<string> securityEmails)
+        //{
+        //    var subject = "Solicitud de reservación aprobada";
+        //    var body = $"Estimado {requester.PrimerNombre}, su solicitud ha sido aprobada.";
+
+        //    var recipients = new List<string> { requester.Correo };
+        //    recipients.AddRange(securityEmails);
+
+        //    await SendEmailAsync(subject, body, recipients);
+        //}
+
+        private List<string> GetDepartmentEmails(string departmentName)
         {
-            // Aquí consultas los correos del departamento de logística desde la base de datos
-            // return correos;
-            return await Task.FromResult(new List<string> { "logistica@tuempresa.com" });
+            // Simulación de obtención de correos desde la base de datos
+            // Reemplaza esta función para consultar la base de datos real
+            return departmentName == "Logística"
+                ? new List<string> { "wilmerantoniosinay@gmail.com", "krodasa7@miumg.edu.gt" }
+                : new List<string> { "wilmerantoniosinay@gmail.com" }; //seguridad1@empresa.com
         }
     }
 }

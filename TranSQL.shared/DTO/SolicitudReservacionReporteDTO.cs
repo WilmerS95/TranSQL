@@ -6,17 +6,14 @@ using System.Threading.Tasks;
 
 namespace TranSQL.shared.DTO
 {
-    public class SolicitudReservacionLogisticaDTO
+    public class SolicitudReservacionReporteDTO
     {
         public int IdSolicitud { get; set; }
-        public string Motivo { get; set; } = string.Empty;
+        public string Motivo { get; set; }
         public DateTime Fecha { get; set; }
         public int IdEstadoSolicitud { get; set; }
-        public EstadoSolicitudDTO EstadoSolicitud { get; set; }
-        public ColaboradorDTO Colaborador { get; set; }
-        public string MotivoAccion { get; set; }
-        public bool IsRechazarIntentado { get; set; } = false;
-
+        public string NombreEstadoSolicitud { get; set; }
+        public string ColaboradorNombreCompleto { get; set; }
         public string JustificacionRechazo { get; set; }
     }
 }

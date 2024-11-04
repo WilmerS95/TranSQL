@@ -1,0 +1,86 @@
+﻿@using TranSQL.shared.models
+@page "/asignar-vehiculos/{idSolicitud:int}"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3 class="text-center my-4">Asignar Vehículos a la Solicitud @idSolicitud</h3>
+
+<div class="container">
+    <EditForm Model="@asignacionModel" OnValidSubmit="ProcesarAsignacion">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        @foreach (var grupoVehiculos in vehiculosPorTipo)
+        {
+            <div class="card my-3">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">@tipoVehiculoNombres[grupoVehiculos.Key]</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var vehiculo in grupoVehiculos.Value)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" @bind="@vehiculo.Seleccionado" id="@vehiculo.Placa" />
+                                    <label class="form-check-label" for="@vehiculo.Placa">@vehiculo.Placa (@vehiculo.Modelo)</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success btn-lg">Asignar Vehículos</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int idSolicitud { get; set; }
+
+    private object asignacionModel = new();
+
+    // Diccionario auxiliar para mapear idTipoVehiculo a nombre
+    private readonly Dictionary<int, string> tipoVehiculoNombres = new()
+    {
+        { 1, "Pickup" },
+        { 2, "Automóvil" },
+        { 3, "Bus" }
+    };
+
+    private Dictionary<int, List<VehiculoSeleccionado>> vehiculosPorTipo = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var vehiculosDisponibles = await Http.GetFromJsonAsync<List<VehiculoSeleccionado>>("api/vehiculos/disponibles");
+
+        // Agrupa los vehículos por idTipoVehiculo y maneja el nombre usando el diccionario auxiliar
+        vehiculosPorTipo = vehiculosDisponibles
+            .GroupBy(v => v.IdTipoVehiculo)
+            .ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private async Task ProcesarAsignacion()
+    {
+        var placasSeleccionadas = vehiculosPorTipo
+            .SelectMany(grupo => grupo.Value)
+            .Where(v => v.Seleccionado)
+            .Select(v => v.Placa)
+            .ToList();
+
+        var response = await Http.PutAsJsonAsync($"api/vehiculos/asignar-vehiculos/{idSolicitud}", placasSeleccionadas);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/logistica-solicitudes");
+        }
+        else
+        {
+            Console.WriteLine("Error en la asignación.");
+        }
+    }
+}

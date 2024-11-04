@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TranSQL.shared.models;
+using TranSQL.shared.DTO;
 
 namespace TranSQL.server.Controllers
 {
@@ -16,6 +17,98 @@ namespace TranSQL.server.Controllers
         public VehiculosController(TranSQLDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("management")]
+        public async Task<ActionResult<IEnumerable<VehiculoManagementDTO>>> GetVehiculoManagementInfo()
+        {
+            var vehiculos = await _context.Vehiculos
+                .Include(v => v.EstadoVehiculo)
+                .Include(v => v.Asignaciones)
+                .ThenInclude(a => a.SolicitudReservacion)
+                .ThenInclude(s => s.Colaborador)
+                .Select(v => new VehiculoManagementDTO
+                {
+                    Placa = v.Placa,
+                    Modelo = v.Modelo,
+                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo,
+                    Asignacion = v.Asignaciones.Select(a => new AsignacionInfoDTO
+                    {
+                        Fecha = a.SolicitudReservacion.Fecha,
+                        Colaborador = $"{a.SolicitudReservacion.Colaborador.PrimerNombre} {a.SolicitudReservacion.Colaborador.PrimerApellido}",
+                        EstadoSolicitud = a.EstadoSolicitud.NombreEstadoSolicitud
+                    }).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return Ok(vehiculos);
+        }
+
+        [HttpPut("{placa}/estado")]
+        public async Task<IActionResult> UpdateVehicleStatus(string placa, [FromBody] UpdateVehicleStatusDTO updateDto)
+        {
+            var vehiculo = await _context.Vehiculos.FindAsync(placa);
+            if (vehiculo == null) return NotFound();
+
+            vehiculo.IdEstadoVehiculo = updateDto.NuevoEstado;
+            _context.Entry(vehiculo).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
+        [HttpGet("estado/{nombreEstado}")]
+        public async Task<ActionResult<List<VehiculoInspeccionDTO>>> GetVehiculosPorEstado(string nombreEstado)
+        {
+            var vehiculos = await _context.Vehiculos
+                .Include(v => v.EstadoVehiculo)
+                .Where(v => v.EstadoVehiculo.NombreEstadoVehiculo == nombreEstado)
+                .Select(v => new VehiculoInspeccionDTO
+                {
+                    Placa = v.Placa,
+                    Modelo = v.Modelo,
+                    EstadoVehiculo = v.EstadoVehiculo.NombreEstadoVehiculo,
+                    OdometroInicial = v.OdometroInicial,
+                    OdometroFinal = v.OdometroFinal
+                })
+                .ToListAsync();
+
+            Console.WriteLine($"Vehiculos encontrados: {vehiculos.Count}");
+
+            if (!vehiculos.Any())
+            {
+                return NotFound(new { message = $"No se encontraron vehículos con estado {nombreEstado}." });
+            }
+
+            return Ok(vehiculos);
+        }
+
+        [HttpPut("cambiarEstado/{placa}")]
+        public async Task<IActionResult> CambiarEstadoVehiculo(string placa, [FromBody] EstadoCambioRequest request)
+        {
+            var vehiculo = await _context.Vehiculos.FirstOrDefaultAsync(v => v.Placa == placa);
+
+            if (vehiculo == null)
+            {
+                return NotFound("Vehículo no encontrado.");
+            }
+
+            var estadoVehiculo = await _context.EstadosVehiculo.FirstOrDefaultAsync(e => e.NombreEstadoVehiculo == request.NuevoEstado);
+            if (estadoVehiculo == null)
+            {
+                return BadRequest("Estado de vehículo inválido.");
+            }
+
+            vehiculo.IdEstadoVehiculo = estadoVehiculo.IdEstadoVehiculo;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        public class EstadoCambioRequest
+        {
+            public string NuevoEstado { get; set; }
         }
 
         // GET: api/<VehiculosController>
@@ -43,6 +136,39 @@ namespace TranSQL.server.Controllers
 
             return Ok(vehiculosDto);
         }
+
+        [HttpGet("disponibles")]
+        public async Task<ActionResult<IEnumerable<Vehiculo>>> GetVehiculosDisponibles()
+        {
+            var disponibles = await _context.Vehiculos
+                .Where(v => v.IdEstadoVehiculo == 1) // 1 = Disponible
+                .ToListAsync();
+            return Ok(disponibles);
+        }
+
+        // PUT: api/vehiculos/asignar-vehiculos/{idSolicitud}
+        [HttpPut("asignar-vehiculos/{idSolicitud}")]
+        public async Task<IActionResult> AsignarVehiculos(int idSolicitud, [FromBody] List<string> placasSeleccionadas)
+        {
+            var solicitud = await _context.SolicitudesReservacion.FindAsync(idSolicitud);
+            if (solicitud == null)
+            {
+                return NotFound("Solicitud no encontrada");
+            }
+
+            var vehiculos = await _context.Vehiculos
+                .Where(v => placasSeleccionadas.Contains(v.Placa) && v.IdEstadoVehiculo == 1)
+                .ToListAsync();
+
+            foreach (var vehiculo in vehiculos)
+            {
+                vehiculo.IdEstadoVehiculo = 2;
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Vehículos asignados y estado actualizado.");
+        }
+
 
         // GET api/<VehiculosController>/5
         [HttpGet("{placa}")]
@@ -76,8 +202,19 @@ namespace TranSQL.server.Controllers
 
         // POST api/<VehiculosController>
         [HttpPost]
-        public async Task<ActionResult<Vehiculo>> PostVehiculo(Vehiculo vehiculo)
+        public async Task<ActionResult<Vehiculo>> PostVehiculo(CreateVehiculoDTO vehiculoDto)
         {
+            // Mapea el DTO al modelo Vehiculo
+            var vehiculo = new Vehiculo
+            {
+                Placa = vehiculoDto.Placa,
+                Modelo = vehiculoDto.Modelo,
+                OdometroInicial = vehiculoDto.OdometroInicial,
+                OdometroFinal = vehiculoDto.OdometroFinal,
+                IdTipoVehiculo = vehiculoDto.IdTipoVehiculo,
+                IdEstadoVehiculo = vehiculoDto.IdEstadoVehiculo
+            };
+
             _context.Vehiculos.Add(vehiculo);
             await _context.SaveChangesAsync();
 

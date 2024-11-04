@@ -10,23 +10,35 @@ namespace TranSQL.shared.models
     public class Asignacion
     {
         [Key]
-        public int idAsignacion { get; set; }
-        public int idColaborador { get; set; }
-        public int idEstadoSolicitud { get; set; }
-        public Colaborador colaborador;
-        public EstadoSolicitud estadoSolicitud;
+        public int IdAsignacion { get; set; }
 
-        public Asignacion(int idAsignacion, int idColaborador, int idEstadoSolicitud, Colaborador colaborador, EstadoSolicitud estadoSolicitud)
-        {
-            this.idAsignacion = idAsignacion;
-            this.idColaborador = idColaborador;
-            this.idEstadoSolicitud = idEstadoSolicitud;
-            this.colaborador = colaborador ?? throw new ArgumentNullException(nameof(colaborador));
-            this.estadoSolicitud = estadoSolicitud ?? throw new ArgumentNullException(nameof(estadoSolicitud));
-        }
+        // Llave foránea para Vehiculo
+        [Required]
+        [StringLength(10)]
+        public string Placa { get; set; }
+        public Vehiculo Vehiculo { get; set; }
 
-        public Asignacion()
+        // Llave foránea para SolicitudReservacion
+        [Required]
+        public int IdSolicitud { get; set; }
+        public SolicitudReservacion SolicitudReservacion { get; set; }
+
+        public int IdColaborador { get; set; }
+        public int IdEstadoSolicitud { get; set; }
+
+        public Colaborador Colaborador { get; set; }
+        public EstadoSolicitud EstadoSolicitud { get; set; }
+
+        public Asignacion() { }
+
+        public Asignacion(int idAsignacion, string placa, int idSolicitud, int idColaborador, int idEstadoSolicitud)
         {
+            IdAsignacion = idAsignacion;
+            Placa = placa ?? throw new ArgumentNullException(nameof(placa));
+            IdSolicitud = idSolicitud;
+            IdColaborador = idColaborador;
+            IdEstadoSolicitud = idEstadoSolicitud;
         }
     }
+
 }

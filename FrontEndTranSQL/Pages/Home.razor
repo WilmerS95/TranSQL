@@ -4,12 +4,44 @@
 @page "/"
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-@* <h3>Bienvenido a la página principal</h3> *@
 
-    @* <Login /> *@
+@if (isLoggedIn)
+{
+    <h4>Participantes del Grupo #1 - Bases de Datos 1</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre del Participante</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var participante in participantes)
+                {
+                    <tr>
+                        <td>@participante</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>Por favor, inicia sesión para ver la lista de participantes.</p>
+}
 
 @code {
     private bool isLoggedIn;
+    private List<string> participantes = new List<string>
+    {
+        "Keity Ximena Rodas Aguilar",
+        "Wilmer Antonio Sinay",
+        "Ana Raquel Donis Portillo",
+        "Jorge Leonardo Antuche Solis",
+        "José Miguel Angel Sánchez López",
+        "Ana Rocío Del Cid López"
+    };
 
     protected override async Task OnInitializedAsync()
     {

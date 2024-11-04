@@ -1,7 +1,181 @@
 ﻿@page "/inspecciones"
+@using TranSQL.client.Services
+@using TranSQL.shared.DTO
+@inject InspeccionVehiculoService InspeccionService
+@inject IJSRuntime jsRuntime
 
-<h3>Gestión de Inspecciones</h3>
+<h3>Gestión de Inspecciones de Vehículos (Simulación)</h3>
+
+@if (inspecciones == null)
+{
+    <p>Cargando inspecciones...</p>
+}
+else
+{
+    <button class="btn btn-primary my-3" @onclick="MostrarFormularioAgregar">Agregar Nueva Inspección</button>
+
+    <table class="table table-hover table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Fecha</th>
+                <th>Observaciones</th>
+                <th>Odómetro Inicial</th>
+                <th>Odómetro Final</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var inspeccion in inspecciones)
+            {
+                <tr>
+                    <td>@inspeccion.FechaInspeccion.ToShortDateString()</td>
+                    <td>@inspeccion.Observaciones</td>
+                    <td>@inspeccion.OdometroInicial</td>
+                    <td>@inspeccion.OdometroFinal</td>
+                    <td>
+                        <button class="btn btn-warning" @onclick="() => EditarInspeccion(inspeccion.IdInspeccion)">Editar</button>
+                        <button class="btn btn-danger" @onclick="() => EliminarInspeccion(inspeccion.IdInspeccion)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="border p-3 my-4">
+        <h4>@(editarInspeccion.IdInspeccion > 0 ? "Editar Inspección" : "Agregar Inspección")</h4>
+        <EditForm Model="editarInspeccion" OnValidSubmit="GuardarInspeccion">
+            <div class="mb-3">
+                <label>Fecha:</label>
+                <InputDate @bind-Value="editarInspeccion.FechaInspeccion" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label>Tipo de Inspección:</label>
+                <InputSelect @bind-Value="tipoInspeccionSeleccionado" class="form-control" @onchange="async (e) => await CargarDetallesVehiculo()">
+                    <option value="">Seleccione el tipo de inspección</option>
+                    <option value="Inicial">Inspección Inicial</option>
+                    <option value="Final">Inspección Final</option>
+                </InputSelect>
+            </div>
+
+            @if (!string.IsNullOrEmpty(tipoInspeccionSeleccionado))
+            {
+                <div>
+                    <label>Vehículo para Inspección:</label>
+                    <InputSelect @bind-Value="vehiculoSeleccionado" class="form-control">
+                        <option value="">Seleccione un vehículo</option>
+                        @foreach (var vehiculo in vehiculosDisponibles)
+                        {
+                            <option value="@vehiculo.Placa">@vehiculo.Placa - @vehiculo.Modelo</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mt-3">
+                    <label>Odómetro Inicial:</label>
+                    <span class="form-control">@editarInspeccion.OdometroInicial</span>
+                </div>
+
+                @if (tipoInspeccionSeleccionado == "Final")
+                {
+                    <div class="mt-3">
+                        <label>Odómetro Final:</label>
+                        <InputNumber @bind-Value="editarInspeccion.OdometroFinal" class="form-control" @oninput="CalcularKmsRecorridos" />
+                    </div>
+                    <div class="mt-3">
+                        <label>Kilómetros Recorridos:</label>
+                        <span class="form-control">@kmsRecorridos</span>
+                    </div>
+                }
+            }
+
+            <div class="mb-3">
+                <label>Observaciones:</label>
+                <InputText @bind-Value="editarInspeccion.Observaciones" class="form-control" />
+            </div>
+
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button class="btn btn-secondary" @onclick="Cancelar">Cancelar</button>
+        </EditForm>
+    </div>
+}
 
 @code {
+    private List<InspeccionVehiculoDTO> inspecciones;
+    private List<VehiculoInspeccionDTO> vehiculosDisponibles = new List<VehiculoInspeccionDTO>();
+    private bool mostrarFormulario = false;
+    private InspeccionVehiculoDTO editarInspeccion = new InspeccionVehiculoDTO();
+    private string tipoInspeccionSeleccionado;
+    private string vehiculoSeleccionado;
+    private int kmsRecorridos = 0;
 
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarInspecciones();
+    }
+
+    private async Task CargarInspecciones()
+    {
+        inspecciones = await InspeccionService.GetInspeccionesAsync();
+    }
+
+    private async Task CargarDetallesVehiculo()
+    {
+        if (tipoInspeccionSeleccionado == "Inicial")
+        {
+            vehiculosDisponibles = await InspeccionService.GetVehiculosPorEstado("Solicitado");
+        }
+        else if (tipoInspeccionSeleccionado == "Final")
+        {
+            vehiculosDisponibles = await InspeccionService.GetVehiculosPorEstado("En Ruta");
+        }
+    }
+
+    private void MostrarFormularioAgregar()
+    {
+        editarInspeccion = new InspeccionVehiculoDTO { FechaInspeccion = DateTime.Now };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarInspeccion()
+    {
+        if (editarInspeccion.IdInspeccion == 0)
+        {
+            await InspeccionService.CreateInspeccionAsync(editarInspeccion);
+            await jsRuntime.InvokeVoidAsync("alert", "Inspección creada correctamente.");
+        }
+        else
+        {
+            await InspeccionService.UpdateInspeccionAsync(editarInspeccion.IdInspeccion, editarInspeccion);
+            await jsRuntime.InvokeVoidAsync("alert", "Inspección actualizada correctamente.");
+        }
+
+        mostrarFormulario = false;
+        await CargarInspecciones();
+    }
+
+    private void CalcularKmsRecorridos(ChangeEventArgs e)
+    {
+        editarInspeccion.OdometroFinal = int.Parse(e.Value.ToString());
+        kmsRecorridos = (editarInspeccion.OdometroFinal ?? 0) - (editarInspeccion.OdometroInicial ?? 0);
+    }
+
+    private void EditarInspeccion(int id)
+    {
+        editarInspeccion = inspecciones.First(i => i.IdInspeccion == id);
+        mostrarFormulario = true;
+    }
+
+    private void EliminarInspeccion(int id)
+    {
+        inspecciones.RemoveAll(i => i.IdInspeccion == id);
+        jsRuntime.InvokeVoidAsync("alert", "Inspección eliminada.");
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
 }

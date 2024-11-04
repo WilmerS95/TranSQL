@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace TranSQL.shared.DTO
 {
-    public class AprobacionSolicitudDTO
+    public class VehiculoDTO
     {
-        public string MotivoRechazo { get; set; } = string.Empty;
+        public string Placa { get; set; }
+        public int Modelo { get; set; }
     }
 }

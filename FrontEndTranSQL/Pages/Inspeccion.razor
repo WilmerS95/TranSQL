@@ -1,0 +1,69 @@
+﻿@using TranSQL.client.Services
+@using TranSQL.shared.models
+
+@page "/inspeccion/{id:int}"
+@inject InspeccionService InspeccionService
+@inject NavigationManager Navigation
+
+<h3>Detalle de Inspección</h3>
+
+@if (inspeccion != null)
+{
+    <div>
+        <p><strong>Fecha de Inspección:</strong> @inspeccion.FechaInspeccion</p>
+        <p><strong>Observaciones:</strong> @inspeccion.Observaciones</p>
+        <p><strong>Odómetro Inicial:</strong> @inspeccion.OdometroInicial</p>
+        <p><strong>Odómetro Final:</strong> @inspeccion.OdometroFinal</p>
+
+        @if (!string.IsNullOrEmpty(inspeccion.ImagenRuta))
+        {
+            <img src="@($"/{inspeccion.ImagenRuta}")" alt="Imagen de inspección" style="width:300px;height:auto;" />
+        }
+        else
+        {
+            <p>No hay imagen disponible para esta inspección.</p>
+        }
+
+        <InputFile OnChange="HandleImagenSeleccionada" />
+
+        <button @onclick="SubirImagen" class="btn btn-primary mt-2">Subir Imagen</button>
+    </div>
+}
+else
+{
+    <p>Cargando inspección...</p>
+}
+
+@code {
+    [Parameter] public int id { get; set; }
+    private InspeccionVehiculo inspeccion;
+    private IBrowserFile imagenSeleccionada;
+
+    protected override async Task OnInitializedAsync()
+    {
+        inspeccion = await InspeccionService.ObtenerInspeccionAsync(id);
+    }
+
+    private void HandleImagenSeleccionada(InputFileChangeEventArgs e)
+    {
+        imagenSeleccionada = e.File;
+    }
+
+    private async Task SubirImagen()
+    {
+        if (imagenSeleccionada != null)
+        {
+            var resultado = await InspeccionService.SubirImagenAsync(id, imagenSeleccionada);
+            if (resultado)
+            {
+                inspeccion = await InspeccionService.ObtenerInspeccionAsync(id);
+                StateHasChanged();
+            }
+            else
+            {
+                // Manejar error en la subida
+                Console.WriteLine("Error al subir la imagen");
+            }
+        }
+    }
+}

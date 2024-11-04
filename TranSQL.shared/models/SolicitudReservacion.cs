@@ -12,7 +12,7 @@ namespace TranSQL.shared.models
 
         [Required]
         [StringLength(300)]
-        public string? Motivo { get; set; } = string.Empty;
+        public string Motivo { get; set; } = string.Empty;
 
         [Required]
         public DateTime Fecha { get; set; }
@@ -27,6 +27,11 @@ namespace TranSQL.shared.models
         [ForeignKey("IdEstadoSolicitud")]
         public EstadoSolicitud EstadoSolicitud { get; set; }
 
+        // Relación con Asignacion
+        public ICollection<Asignacion> Asignaciones { get; set; } = new List<Asignacion>();
+
+        public SolicitudReservacion() { }
+
         public SolicitudReservacion(int idSolicitud, string motivo, DateTime fecha, int idColaborador, int idEstadoSolicitud, string justificacionRechazo, Colaborador colaborador, EstadoSolicitud estadoSolicitud)
         {
             IdSolicitud = idSolicitud;
@@ -38,9 +43,6 @@ namespace TranSQL.shared.models
             Colaborador = colaborador ?? throw new ArgumentNullException(nameof(colaborador));
             EstadoSolicitud = estadoSolicitud ?? throw new ArgumentNullException(nameof(estadoSolicitud));
         }
-
-        public SolicitudReservacion()
-        {
-        }
     }
+
 }

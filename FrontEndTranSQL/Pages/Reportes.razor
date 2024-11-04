@@ -1,7 +1,96 @@
 ﻿@page "/reportes"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+@using TranSQL.shared.DTO
 
 <h3>Gestión de Reportes</h3>
 
-@code {
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <h5>Opciones de Reportes</h5>
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action" @onclick="MostrarReporteSolicitudes">
+                    Todas las Solicitudes
+                </li>
+                <!-- Añade más opciones de reporte aquí -->
+            </ul>
+        </div>
+        <div class="col-md-9">
+            <h5>Reporte Seleccionado</h5>
+            @if (reporteSeleccionado == "solicitudes")
+            {
+                <div>
+                    @if (solicitudes != null && solicitudes.Any())
+                    {
+                        <table class="table table-hover table-bordered table-striped align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Motivo de Solicitud</th>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th>Colaborador</th>
+                                    <th>Justificación de Rechazo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var solicitud in solicitudes)
+                                {
+                                    <tr>
+                                        <td>@solicitud.Motivo</td>
+                                        <td>@solicitud.Fecha.ToShortDateString()</td>
+                                        <td>@solicitud.EstadoSolicitud?.NombreEstadoSolicitud</td>
+                                        <td>@solicitud.Colaborador?.PrimerNombre @solicitud.Colaborador?.PrimerApellido</td>
+                                        <td>
+                                            @if (solicitud.IdEstadoSolicitud == 2 && !string.IsNullOrEmpty(solicitud.JustificacionRechazo))
+                                            {
+                                                <button class="btn btn-info btn-sm" @onclick="() => MostrarMotivoRechazo(solicitud.JustificacionRechazo)">
+                                                    Ver Motivo
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <span>N/A</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No hay solicitudes disponibles.</p>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>Seleccione un reporte para visualizar.</p>
+            }
+        </div>
+    </div>
+</div>
 
+@code {
+    private List<SolicitudReservacionLogisticaDTO> solicitudes;
+    private string reporteSeleccionado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Inicializa la página sin ningún reporte seleccionado
+        reporteSeleccionado = string.Empty;
+    }
+
+    private async Task MostrarReporteSolicitudes()
+    {
+        reporteSeleccionado = "solicitudes";
+        solicitudes = await Http.GetFromJsonAsync<List<SolicitudReservacionLogisticaDTO>>("api/solicitudesreservacion/todas");
+    }
+
+    private async Task MostrarMotivoRechazo(string motivoRechazo)
+    {
+        await JS.InvokeVoidAsync("alert", $"Motivo de rechazo: {motivoRechazo}");
+    }
 }
